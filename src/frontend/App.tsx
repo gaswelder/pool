@@ -6,10 +6,28 @@ import { PlannedWorkout, WorkoutFromJSON } from "../types";
 import { call } from "./api";
 import { Planned } from "./Planned";
 import { Review } from "./Review";
+import { Theme } from "./theme";
 import { useResource } from "./use-resource";
 
 const AppDiv = styled.div`
+  background: #d1dfec;
+  min-height: 100%;
   padding: 1em;
+  & > a {
+    color: #2b475c;
+  }
+  & h3 {
+    color: #0d3639;
+  }
+  & button {
+    font-size: ${Theme.fontSize};
+    font-family: inherit;
+    border-radius: ${Theme.borderRadius};
+    padding: 4px ${Theme.w};
+    border: 1px solid #5b7f91;
+    background-color: #f1f0f2;
+    color: #2b475c;
+  }
 `;
 
 export const App = () => {

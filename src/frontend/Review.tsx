@@ -3,12 +3,17 @@ import styled from "styled-components";
 import { workoutVolume } from "../parser/parser";
 import { ParsedWorkout } from "../types";
 import { Collapsible } from "./Collapsible";
+import { Theme } from "./theme";
 import { Workout } from "./Workout";
 
-const formatDate = (date: Date) => {
-  const wd = date.toLocaleDateString("ru", { weekday: "short" });
-  return date.toLocaleDateString("ru", { dateStyle: "full" }) + ` (${wd})`;
-};
+const ContainerDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  & button {
+    margin-top: ${Theme.h};
+    margin-left: auto;
+  }
+`;
 
 const Title = styled.div`
   display: flex;
@@ -30,13 +35,13 @@ export const Review = ({ workouts, onArchive }: P) => {
             key={workout.date}
             header={() => (
               <Title>
-                {workout.title || formatDate(new Date(workout.date))}{" "}
+                {workout.title || workout.date}{" "}
                 <span>{workoutVolume(workout.sections)} m</span>
               </Title>
             )}
             content={() => {
               return (
-                <>
+                <ContainerDiv>
                   <Workout sections={workout.sections} />
                   <button
                     type="button"
@@ -46,7 +51,7 @@ export const Review = ({ workouts, onArchive }: P) => {
                   >
                     Archive
                   </button>
-                </>
+                </ContainerDiv>
               );
             }}
           />

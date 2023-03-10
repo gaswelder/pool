@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { workoutVolume } from "../parser/parser";
 import { Section } from "../types";
 import bracket from "./Left_square_bracket.svg";
+import { Theme } from "./theme";
 
 const Tag = styled.span`
   display: inline-block;
@@ -19,7 +20,8 @@ const Table = styled.table`
   td,
   th {
     padding: 10px 4px;
-    border-bottom: thin solid #ccc;
+    border-bottom: thin solid #d1dfec;
+    font-size: ${Theme.fontSize};
   }
   .repeats {
     width: 35px;
@@ -33,51 +35,55 @@ type P = {
 };
 export const Workout = ({ sections }: P) => {
   return (
-    <div>
-      <Table>
-        <tbody>
-          {sections.map((section) => {
-            return (
-              <>
-                {section.name && (
-                  <tr>
-                    <th colSpan={3}>{section.name}</th>
+    <Table>
+      <tbody>
+        {sections.map((section) => {
+          return (
+            <>
+              {section.name && (
+                <tr>
+                  <th colSpan={3}>{section.name}</th>
+                </tr>
+              )}
+              {section.ex.map((ex, j) => {
+                return (
+                  <tr key={`${j}`}>
+                    {j == 0 && (
+                      <td rowSpan={section.ex.length} className="repeats">
+                        {section.repeats > 1 && (
+                          <RepeatsContainer>
+                            &times;{section.repeats}
+                            <div
+                              style={{ backgroundImage: `url(${bracket})` }}
+                            ></div>
+                          </RepeatsContainer>
+                        )}
+                      </td>
+                    )}
+                    <td>
+                      {ex.repeats} &times; {ex.amount}
+                    </td>
+                    <td>
+                      {ex.desc}{" "}
+                      {ex.equipment.map((item) => (
+                        <Equipment key={item} id={item} />
+                      ))}
+                    </td>
                   </tr>
-                )}
-                {section.ex.map((ex, j) => {
-                  return (
-                    <tr key={`${j}`}>
-                      {j == 0 && (
-                        <td rowSpan={section.ex.length} className="repeats">
-                          {section.repeats > 1 && (
-                            <RepeatsContainer>
-                              &times;{section.repeats}
-                              <div
-                                style={{ backgroundImage: `url(${bracket})` }}
-                              ></div>
-                            </RepeatsContainer>
-                          )}
-                        </td>
-                      )}
-                      <td>
-                        {ex.repeats} &times; {ex.amount}
-                      </td>
-                      <td>
-                        {ex.desc}{" "}
-                        {ex.equipment.map((item) => (
-                          <Equipment key={item} id={item} />
-                        ))}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </>
-            );
-          })}
-        </tbody>
-      </Table>
-      {workoutVolume(sections)} m
-    </div>
+                );
+              })}
+            </>
+          );
+        })}
+        <tr>
+          <td></td>
+          <td>
+            <b>{workoutVolume(sections)}</b>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </Table>
   );
 };
 
