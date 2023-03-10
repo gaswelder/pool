@@ -61,7 +61,13 @@ export const Workout = ({ sections }: P) => {
                       </td>
                     )}
                     <td>
-                      {ex.repeats} &times; {ex.amount}
+                      {ex.repeats > 1 ? (
+                        <>
+                          {ex.repeats}&times;{ex.amount}
+                        </>
+                      ) : (
+                        <>{ex.amount}</>
+                      )}
                     </td>
                     <td>
                       {ex.desc}{" "}
