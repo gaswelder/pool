@@ -44,6 +44,10 @@ const Table = styled.table`
   .repeats.open {
     width: 36px;
   }
+  .section-name th {
+    font-weight: normal;
+    font-style: italic;
+  }
 `;
 
 type P = {
@@ -58,7 +62,7 @@ export const Workout = ({ sections }: P) => {
           return (
             <>
               {section.name && (
-                <tr>
+                <tr className="section-name">
                   <th colSpan={3}>{section.name}</th>
                 </tr>
               )}
