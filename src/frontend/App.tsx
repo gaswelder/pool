@@ -7,6 +7,7 @@ import { call } from "./api";
 import { Planned } from "./Planned";
 import { Review } from "./Review";
 import { Theme } from "./theme";
+import { toast } from "./toast";
 import { useResource } from "./use-resource";
 
 const AppDiv = styled.div`
@@ -73,6 +74,7 @@ const Content = () => {
           workouts={db.workouts.map(parseJSONWorkout)}
           onArchive={async (id) => {
             await call("archive", { id });
+            toast("Archived");
             await reload();
           }}
         />
