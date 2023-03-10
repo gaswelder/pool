@@ -4,6 +4,7 @@ import { parseJSONWorkout } from "../parser/parser";
 import { toErr } from "../ts";
 import { PlannedWorkout, WorkoutFromJSON } from "../types";
 import { call } from "./api";
+import { Draft } from "./Draft";
 import { Planned } from "./Planned";
 import { Review } from "./Review";
 import { Theme } from "./theme";
@@ -20,6 +21,17 @@ const AppDiv = styled.div`
   & h3 {
     color: #0d3639;
   }
+  & input {
+    font-size: ${Theme.fontSize};
+    font-family: inherit;
+    border-radius: ${Theme.borderRadius};
+    border: 1px solid #5b7f91;
+    padding: 8px ${Theme.w};
+  }
+  & textarea {
+    font-size: ${Theme.fontSize};
+    padding: 8px ${Theme.w};
+  }
   & button {
     font-size: ${Theme.fontSize};
     font-family: inherit;
@@ -34,7 +46,8 @@ const AppDiv = styled.div`
 export const App = () => {
   return (
     <AppDiv>
-      <a href="planned">Planned</a> | <a href="review">Review</a>
+      <a href="draft">Draft</a> | <a href="planned">Planned</a> |{" "}
+      <a href="review">Review</a>
       <Content />
     </AppDiv>
   );
@@ -55,10 +68,11 @@ const Content = () => {
   switch (location.pathname) {
     case "/":
     case "/planned":
+      return <Planned planned={db.planned} />;
+    case "/draft":
       return (
-        <Planned
-          planned={db.planned}
-          onDraftAdd={async (draft) => {
+        <Draft
+          onAdd={async (draft) => {
             try {
               await call("addPlan", draft);
               await reload();

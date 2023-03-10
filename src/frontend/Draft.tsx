@@ -10,50 +10,71 @@ const DraftTextarea = styled.textarea`
   height: 30em;
 `;
 
+const WorkoutContainer = styled.div`
+  background-color: white;
+`;
+
 const TwoDiv = styled.div`
   display: flex;
+  & > * {
+    flex: 1;
+  }
 `;
 
 type P = {
-  onAdd: (w: PlannedWorkout) => void;
+  onAdd: (w: PlannedWorkout) => Promise<void>;
 };
 
 export const Draft = ({ onAdd }: P) => {
-  const [val, setVal] = useState("");
-  const { result, errors } = useMemo(() => parseDraft(val), [val]);
   const [title, setTitle] = useState("");
+  const [val, setVal] = useState(`-- warmup
+4 x 100 easy flutter kick
+4 x 100 easy freestyle
+-- 4 x main
+100 underwater pull
+400 butterfly
+`);
+  const { result, errors } = useMemo(() => parseDraft(val), [val]);
+
   return (
-    <div>
-      <input
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-        }}
-      />
-      <TwoDiv>
-        <DraftTextarea
-          onChange={(e) => {
-            setVal(e.target.value);
-          }}
-        >
-          {val}
-        </DraftTextarea>
-        {result && <Workout sections={result} />}
-      </TwoDiv>
-      {errors.map((err, i) => (
-        <p key={i} style={{ color: "red" }}>
-          {err.message}
-        </p>
-      ))}
-      <button
-        type="button"
-        disabled={errors.length > 0}
-        onClick={() => {
-          onAdd({ title, draft: val });
+    <>
+      <h3>Workout draft</h3>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          await onAdd({ title, draft: val });
+          location.href = "planned";
         }}
       >
-        Plan
-      </button>
-    </div>
+        <input
+          placeholder="title"
+          required
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+        />
+        <TwoDiv>
+          <DraftTextarea
+            onChange={(e) => {
+              setVal(e.target.value);
+            }}
+          >
+            {val}
+          </DraftTextarea>
+          {result && (
+            <WorkoutContainer>
+              <Workout sections={result} />
+            </WorkoutContainer>
+          )}
+        </TwoDiv>
+        {errors.map((err, i) => (
+          <p key={i} style={{ color: "red" }}>
+            {err.message}
+          </p>
+        ))}
+        <button disabled={errors.length > 0}>Save</button>
+      </form>
+    </>
   );
 };

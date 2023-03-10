@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { parseDraft, workoutVolume } from "../parser/parser";
 import { PlannedWorkout } from "../types";
 import { Collapsible } from "./Collapsible";
-import { Draft } from "./Draft";
 import { Workout } from "./Workout";
 
 const Title = styled.div`
@@ -13,10 +12,9 @@ const Title = styled.div`
 
 type P = {
   planned: PlannedWorkout[];
-  onDraftAdd: (d: unknown) => void;
 };
 
-export const Planned = ({ planned, onDraftAdd }: P) => {
+export const Planned = ({ planned }: P) => {
   return (
     <>
       <h3>Planned</h3>
@@ -42,7 +40,6 @@ export const Planned = ({ planned, onDraftAdd }: P) => {
           />
         );
       })}
-      <Draft onAdd={onDraftAdd} />
     </>
   );
 };
