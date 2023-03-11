@@ -20,16 +20,6 @@ const RepeatsContainer = styled.div`
   }
 `;
 
-const Tag = styled.span`
-  display: inline-block;
-  padding: 0 7px;
-  margin: 0 2px;
-  border-radius: 2px;
-  font-size: 90%;
-  color: ${(props) => props.color};
-  border: thin solid ${(props) => props.color};
-`;
-
 const Table = styled.table`
   width: 100%;
   td,
@@ -117,15 +107,27 @@ export const Workout = ({ sections }: P) => {
   );
 };
 
+const Tag = styled.span`
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0 2px;
+  font-size: 90%;
+  color: ${(props) => props.color};
+  border: 1px solid ${(props) => props.color};
+  border-radius: ${Theme.borderRadius};
+`;
+
 const Equipment = ({ id }: { id: string }) => {
   const colors: Record<string, string> = {
     buoy: "green",
-    shortpaddles: "gold",
+    "ankle-buoy": "green",
+    shortpaddles: "orange",
+    "small-paddles": "orange",
     paddles: "gray",
     bigpaddles: "red",
     kickboard: "blue",
-    brakes: "gold",
-    fins: "red",
+    brakes: "greed",
+    fins: "orange",
   };
   return <Tag color={colors[id]}>{id}</Tag>;
 };
