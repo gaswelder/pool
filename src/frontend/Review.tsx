@@ -29,34 +29,36 @@ export const Review = ({ workouts, onArchive }: P) => {
   return (
     <>
       <h3>Review</h3>
-      {workouts.map((workout) => {
-        return (
-          <Collapsible
-            key={workout.date}
-            header={() => (
-              <Title>
-                {workout.title || workout.date}{" "}
-                <span>{workoutVolume(workout.sections)} m</span>
-              </Title>
-            )}
-            content={() => {
-              return (
-                <ContainerDiv>
-                  <Workout sections={workout.sections} />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onArchive(workout.title);
-                    }}
-                  >
-                    Archive
-                  </button>
-                </ContainerDiv>
-              );
-            }}
-          />
-        );
-      })}
+      {workouts
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .map((workout) => {
+          return (
+            <Collapsible
+              key={workout.date}
+              header={() => (
+                <Title>
+                  {workout.title || workout.date}{" "}
+                  <span>{workoutVolume(workout.sections)} m</span>
+                </Title>
+              )}
+              content={() => {
+                return (
+                  <ContainerDiv>
+                    <Workout sections={workout.sections} />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onArchive(workout.title);
+                      }}
+                    >
+                      Archive
+                    </button>
+                  </ContainerDiv>
+                );
+              }}
+            />
+          );
+        })}
     </>
   );
 };
