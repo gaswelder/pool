@@ -137,7 +137,7 @@ const parseDescription = (buf: PBuf) => {
     }
     const part = buf.word();
     buf.spaces();
-    if (part.match(/#\w+$/)) {
+    if (part[0] == "#") {
       eqs.push(part.substring(1, part.length));
     } else {
       noneqs.push(part);
