@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { parseJSONWorkout } from "../parser/parser";
 import { toErr } from "../ts";
 import { PlannedWorkout, WorkoutFromJSON } from "../types";
+import { A, useLocation } from "./A";
 import { call } from "./api";
 import { Draft } from "./Draft";
 import { Planned } from "./Planned";
@@ -47,8 +48,8 @@ const AppDiv = styled.div`
 export const App = () => {
   return (
     <AppDiv>
-      <a href="draft">Draft</a> | <a href="planned">Planned</a> |{" "}
-      <a href="review">Review</a>
+      <A href="draft">Draft</A> | <A href="planned">Planned</A> |{" "}
+      <A href="review">Review</A>
       <Content />
     </AppDiv>
   );
@@ -63,6 +64,7 @@ const Content = () => {
       }>,
     []
   );
+  const { location } = useLocation();
   if (!db) {
     return <>loading db</>;
   }
