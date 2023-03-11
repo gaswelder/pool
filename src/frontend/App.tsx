@@ -17,6 +17,7 @@ const AppDiv = styled.div`
   padding: 1em;
   & > a {
     color: #2b475c;
+    text-decoration: none;
   }
   & h3 {
     color: #0d3639;
