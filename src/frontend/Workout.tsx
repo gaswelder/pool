@@ -30,8 +30,6 @@ const Table = styled.table`
   }
   .repeats {
     position: relative;
-  }
-  .repeats.open {
     width: 36px;
   }
   .section-name th {
@@ -53,17 +51,14 @@ export const Workout = ({ sections }: P) => {
             <>
               {section.name && (
                 <tr className="section-name">
-                  <th colSpan={3}>{section.name}</th>
+                  <th colSpan={haveRepeats ? 3 : 2}>{section.name}</th>
                 </tr>
               )}
               {section.ex.map((ex, j) => {
                 return (
                   <tr key={`${j}`}>
-                    {j == 0 && (
-                      <td
-                        rowSpan={section.ex.length}
-                        className={["repeats", haveRepeats && "open"].join(" ")}
-                      >
+                    {j == 0 && haveRepeats && (
+                      <td rowSpan={section.ex.length} className="repeats">
                         {section.repeats > 1 && (
                           <RepeatsContainer>
                             &times;{section.repeats}
@@ -96,7 +91,7 @@ export const Workout = ({ sections }: P) => {
           );
         })}
         <tr>
-          <td></td>
+          {haveRepeats && <td></td>}
           <td>
             <b>{workoutVolume(sections)}</b>
           </td>
