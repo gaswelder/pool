@@ -1,5 +1,5 @@
-import * as React from "react";
-import ReactDOM from "react-dom";
+import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import styled from "styled-components";
 import { Theme } from "./theme";
 
@@ -12,9 +12,10 @@ export const toast = (msg: string) => {
     left: "50vw",
   });
   document.body.appendChild(node);
-  ReactDOM.render(<Toaster msg={msg} />, node);
+  const root = createRoot(node);
+  root.render(<Toaster msg={msg} />);
   setTimeout(() => {
-    ReactDOM.unmountComponentAtNode(node);
+    root.unmount();
     node.remove();
   }, duration + 1000);
 };
@@ -33,8 +34,8 @@ const Container = styled.div`
 `;
 
 const Toaster = ({ msg }: { msg: string }) => {
-  const [className, setClassName] = React.useState("");
-  React.useEffect(() => {
+  const [className, setClassName] = useState("");
+  useEffect(() => {
     setClassName("open");
     return clearTimeout(
       setTimeout(() => {
