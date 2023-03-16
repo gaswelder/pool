@@ -41,6 +41,10 @@ const AppDiv = styled.div`
     background-color: #f1f0f2;
     color: #2b475c;
   }
+  & button:active {
+    border-color: #2618ce;
+    background-color: #bbdeeb;
+  }
 `;
 
 export const App = () => {
