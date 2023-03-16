@@ -1,4 +1,4 @@
-import * as React from "react";
+import { Fragment } from "react";
 import styled from "styled-components";
 import { workoutVolume } from "../parser/parser";
 import { Section } from "../types";
@@ -46,9 +46,9 @@ export const Workout = ({ sections }: P) => {
   return (
     <Table>
       <tbody>
-        {sections.map((section) => {
+        {sections.map((section, i) => {
           return (
-            <>
+            <Fragment key={i}>
               {section.name && (
                 <tr className="section-name">
                   <th colSpan={haveRepeats ? 3 : 2}>{section.name}</th>
@@ -87,7 +87,7 @@ export const Workout = ({ sections }: P) => {
                   </tr>
                 );
               })}
-            </>
+            </Fragment>
           );
         })}
         <tr>
