@@ -27,17 +27,31 @@ express()
   })
   .listen(2346);
 
+const table = (name: string) => {
+  const data = JSON.parse(fs.readFileSync(`data/${name}.json`).toString());
+  return data.records;
+};
+
+const writeTable = (name: string, records: unknown[]) => {
+  fs.copyFileSync(
+    `data/${name}.json`,
+    `data/backup-${Date.now()}-${name}.json`
+  );
+  fs.writeFileSync(`data/${name}.json`, JSON.stringify({ records }, null, 2));
+};
+
 const get = () => {
-  return JSON.parse(fs.readFileSync("data/pool.json").toString()) as {
-    workouts: WorkoutFromJSON[];
-    archive?: WorkoutFromJSON[];
-    planned: PlannedWorkout[];
+  return {
+    archive: table("archive") as WorkoutFromJSON[],
+    planned: table("planned") as PlannedWorkout[],
+    workouts: table("workouts") as WorkoutFromJSON[],
   };
 };
 
 const flush = (db: ReturnType<typeof get>) => {
-  fs.copyFileSync("data/pool.json", `data/backup-${Date.now()}.json`);
-  fs.writeFileSync("data/pool.json", JSON.stringify(db, null, 2));
+  writeTable("archive", db.archive);
+  writeTable("planned", db.planned);
+  writeTable("workouts", db.workouts);
 };
 
 const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
@@ -56,12 +70,8 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
     const db = get();
     const id = t.Record({ id: t.String }).check(args).id;
     const pos = db.workouts.findIndex((x) => x.title == id);
-    console.log({ pos });
     if (pos < 0) {
       throw new Error(`not found`);
-    }
-    if (!db.archive) {
-      db.archive = [];
     }
     db.archive.push(db.workouts[pos]);
     db.workouts.splice(pos, 1);
