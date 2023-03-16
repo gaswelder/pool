@@ -1,5 +1,8 @@
-import * as React from "react";
-import ReactDOM from "react-dom";
 import { App } from "./App";
+import { createRoot } from "react-dom/client";
 
-ReactDOM.render(<App />, document.querySelector("#app"));
+const div = document.querySelector("#app");
+if (!div) {
+  throw new Error("div#app is missing");
+}
+createRoot(div).render(<App />);
