@@ -18,6 +18,7 @@ export const Planned = ({ planned }: P) => {
   return (
     <>
       <h3>Planned</h3>
+      <p>{planned.length} workouts</p>
       {planned.map(({ title, draft }) => {
         const { result, errors } = parseDraft(draft);
         return (

@@ -30,6 +30,7 @@ export const Review = ({ workouts, onArchive }: P) => {
   return (
     <>
       <h3>Review</h3>
+      <p>{workouts.length} workouts</p>
       {workouts
         .sort((a, b) => a.date.localeCompare(b.date))
         .map((workout) => {
