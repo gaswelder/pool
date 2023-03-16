@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { workoutVolume } from "../parser/parser";
 import { ParsedWorkout } from "../types";
@@ -26,6 +26,7 @@ type P = {
 };
 
 export const Review = ({ workouts, onArchive }: P) => {
+  const [archiving, setArchiving] = useState(false);
   return (
     <>
       <h3>Review</h3>
@@ -47,8 +48,11 @@ export const Review = ({ workouts, onArchive }: P) => {
                     <Workout sections={workout.sections} />
                     <button
                       type="button"
-                      onClick={() => {
-                        onArchive(workout.title);
+                      disabled={archiving}
+                      onClick={async () => {
+                        setArchiving(true);
+                        await onArchive(workout.title);
+                        setArchiving(false);
                       }}
                     >
                       Archive
