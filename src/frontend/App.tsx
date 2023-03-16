@@ -1,10 +1,8 @@
-import * as React from "react";
 import styled from "styled-components";
 import { parseJSONWorkout } from "../parser/parser";
 import { toErr } from "../ts";
-import { PlannedWorkout, WorkoutFromJSON } from "../types";
 import { A, useLocation } from "./A";
-import { call } from "./api";
+import { api } from "./api";
 import { Draft } from "./Draft";
 import { Planned } from "./Planned";
 import { Review } from "./Review";
@@ -56,14 +54,7 @@ export const App = () => {
 };
 
 const Content = () => {
-  const { data: db, reload } = useResource(
-    () =>
-      call("getWorkouts") as Promise<{
-        planned: PlannedWorkout[];
-        workouts: WorkoutFromJSON[];
-      }>,
-    []
-  );
+  const { data: db, reload } = useResource(api.workouts, []);
   const { location } = useLocation();
   if (!db) {
     return <>loading db</>;
@@ -77,7 +68,7 @@ const Content = () => {
         <Draft
           onAdd={async (draft) => {
             try {
-              await call("addPlan", draft);
+              await api.addPlan(draft);
               await reload();
             } catch (err) {
               alert(toErr(err).message);
@@ -90,7 +81,7 @@ const Content = () => {
         <Review
           workouts={db.workouts.map(parseJSONWorkout)}
           onArchive={async (id) => {
-            await call("archive", { id });
+            await api.archive(id);
             toast("Archived");
             await reload();
           }}
