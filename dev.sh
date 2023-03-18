@@ -1,4 +1,4 @@
 #!/bin/sh
-yarn ts-node src/backend/backend.ts &
+yarn nodemon --ignore "**/*.json" src/backend/backend.ts &
 yarn dev &
 wait
