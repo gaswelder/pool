@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { parseDraft } from "../parser/parser";
-import { WorkoutFromJSON } from "../types";
 import { Workout } from "./Workout";
 
 const DraftTextarea = styled.textarea`
@@ -21,19 +20,19 @@ const TwoDiv = styled.div`
 `;
 
 type P = {
-  onAdd: (w: WorkoutFromJSON) => Promise<void>;
+  onAdd: (w: { title: string; text: string }) => Promise<void>;
 };
 
 export const Draft = ({ onAdd }: P) => {
   const [title, setTitle] = useState("");
-  const [val, setVal] = useState(`-- warmup
+  const [text, setText] = useState(`-- warmup
 4 x 100 easy flutter kick
 4 x 100 easy freestyle
 -- 4 x main
 100 underwater pull
 400 butterfly
 `);
-  const { result, errors } = useMemo(() => parseDraft(val), [val]);
+  const { result, errors } = useMemo(() => parseDraft(text), [text]);
 
   return (
     <>
@@ -41,7 +40,7 @@ export const Draft = ({ onAdd }: P) => {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          await onAdd({ title, ex: val.split(/\n/), date: null });
+          await onAdd({ title, text });
           location.href = "planned";
         }}
       >
@@ -56,10 +55,10 @@ export const Draft = ({ onAdd }: P) => {
         <TwoDiv>
           <DraftTextarea
             onChange={(e) => {
-              setVal(e.target.value);
+              setText(e.target.value);
             }}
           >
-            {val}
+            {text}
           </DraftTextarea>
           {result && (
             <WorkoutContainer>

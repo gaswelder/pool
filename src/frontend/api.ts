@@ -21,6 +21,6 @@ export const api = {
       planned: WorkoutFromJSON[];
       workouts: WorkoutFromJSON[];
     }>,
-  addPlan: (w: WorkoutFromJSON) => call("addPlan", w),
+  addPlan: (w: { title: string; text: string }) => call("addPlan", w),
   archive: (id: string) => call("archive", { id }),
 };

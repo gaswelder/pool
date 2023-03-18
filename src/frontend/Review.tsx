@@ -27,19 +27,20 @@ type P = {
 
 export const Review = ({ workouts, onArchive }: P) => {
   const [archiving, setArchiving] = useState(false);
+  const now = new Date().toISOString();
   return (
     <>
       <h3>Review</h3>
       <p>{workouts.length} workouts</p>
       {workouts
-        .sort((a, b) => a.date.localeCompare(b.date))
+        .sort((a, b) => (a.swam || now).localeCompare(b.swam || now))
         .map((workout) => {
           return (
             <Collapsible
-              key={workout.date}
+              key={workout.title}
               header={() => (
                 <Title>
-                  {workout.title || workout.date}{" "}
+                  {workout.title || workout.swam}{" "}
                   <span>{workoutVolume(workout.sections)} m</span>
                 </Title>
               )}

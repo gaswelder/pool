@@ -1,13 +1,17 @@
 export type WorkoutFromJSON = {
   title: string;
-  date: string | null;
   ex: string[];
+  created: string;
+  swam?: string;
+  archived?: string;
 };
 
 export type ParsedWorkout = {
   title: string;
-  date: string | null;
   sections: Section[];
+  created: string;
+  swam?: string;
+  archived?: string;
 };
 
 export type Section = {

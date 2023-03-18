@@ -67,12 +67,15 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
     const w = t
       .Record({
         title: t.String,
-        date: t.String.Or(t.Null),
-        ex: t.Array(t.String),
+        text: t.String,
       })
       .check(arg);
     const db = get();
-    db.planned.push(w);
+    db.planned.push({
+      created: new Date().toISOString(),
+      title: w.title,
+      ex: w.text.split("\n"),
+    });
     flush(db);
   },
 
