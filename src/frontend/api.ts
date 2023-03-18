@@ -1,4 +1,4 @@
-import { PlannedWorkout, WorkoutFromJSON } from "../types";
+import { WorkoutFromJSON } from "../types";
 
 const call = async (method: string, params?: unknown) => {
   const response = await fetch("http://localhost:2346/rpc", {
@@ -18,9 +18,9 @@ const call = async (method: string, params?: unknown) => {
 export const api = {
   workouts: () =>
     call("getWorkouts") as Promise<{
-      planned: PlannedWorkout[];
+      planned: WorkoutFromJSON[];
       workouts: WorkoutFromJSON[];
     }>,
-  addPlan: (draft: PlannedWorkout) => call("addPlan", draft),
+  addPlan: (w: WorkoutFromJSON) => call("addPlan", w),
   archive: (id: string) => call("archive", { id }),
 };

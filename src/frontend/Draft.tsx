@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import * as React from "react";
 import styled from "styled-components";
 import { parseDraft } from "../parser/parser";
-import { PlannedWorkout } from "../types";
+import { WorkoutFromJSON } from "../types";
 import { Workout } from "./Workout";
 
 const DraftTextarea = styled.textarea`
@@ -22,7 +21,7 @@ const TwoDiv = styled.div`
 `;
 
 type P = {
-  onAdd: (w: PlannedWorkout) => Promise<void>;
+  onAdd: (w: WorkoutFromJSON) => Promise<void>;
 };
 
 export const Draft = ({ onAdd }: P) => {
@@ -42,7 +41,7 @@ export const Draft = ({ onAdd }: P) => {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          await onAdd({ title, draft: val });
+          await onAdd({ title, ex: val.split(/\n/), date: null });
           location.href = "planned";
         }}
       >

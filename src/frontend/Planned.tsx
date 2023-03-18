@@ -1,7 +1,6 @@
-import * as React from "react";
 import styled from "styled-components";
 import { parseDraft, workoutVolume } from "../parser/parser";
-import { PlannedWorkout } from "../types";
+import { WorkoutFromJSON } from "../types";
 import { Collapsible } from "./Collapsible";
 import { Workout } from "./Workout";
 
@@ -11,7 +10,7 @@ const Title = styled.div`
 `;
 
 type P = {
-  planned: PlannedWorkout[];
+  planned: WorkoutFromJSON[];
 };
 
 export const Planned = ({ planned }: P) => {
@@ -19,8 +18,8 @@ export const Planned = ({ planned }: P) => {
     <>
       <h3>Planned</h3>
       <p>{planned.length} workouts</p>
-      {planned.map(({ title, draft }) => {
-        const { result, errors } = parseDraft(draft);
+      {planned.map(({ title, ex }) => {
+        const { result, errors } = parseDraft(ex.join("\n"));
         return (
           <Collapsible
             key={title}

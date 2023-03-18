@@ -2,7 +2,7 @@ import express from "express";
 import * as fs from "fs";
 import * as t from "runtypes";
 import { toErr } from "../ts";
-import { PlannedWorkout, WorkoutFromJSON } from "../types";
+import { WorkoutFromJSON } from "../types";
 
 express()
   .use(express.static("build"))
@@ -43,12 +43,16 @@ const writeTable = (name: string, records: unknown[]) => {
 const get = () => {
   return {
     archive: table("archive") as WorkoutFromJSON[],
-    planned: table("planned") as PlannedWorkout[],
+    planned: table("planned") as WorkoutFromJSON[],
     workouts: table("workouts") as WorkoutFromJSON[],
   };
 };
 
-const flush = (db: ReturnType<typeof get>) => {
+const flush = (db: {
+  archive: WorkoutFromJSON[];
+  planned: WorkoutFromJSON[];
+  workouts: WorkoutFromJSON[];
+}) => {
   writeTable("archive", db.archive);
   writeTable("planned", db.planned);
   writeTable("workouts", db.workouts);
@@ -58,14 +62,20 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
   async getWorkouts() {
     return get();
   },
-  async addPlan(w: unknown) {
+
+  async addPlan(arg: unknown) {
+    const w = t
+      .Record({
+        title: t.String,
+        date: t.String.Or(t.Null),
+        ex: t.Array(t.String),
+      })
+      .check(arg);
     const db = get();
-    if (!db.planned) {
-      db.planned = [];
-    }
-    db.planned.push(w as any);
+    db.planned.push(w);
     flush(db);
   },
+
   async archive(args: unknown) {
     const db = get();
     const id = t.Record({ id: t.String }).check(args).id;

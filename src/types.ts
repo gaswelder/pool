@@ -1,17 +1,12 @@
-export type PlannedWorkout = {
-  title: string;
-  draft: string;
-};
-
 export type WorkoutFromJSON = {
   title: string;
-  date: string;
+  date: string | null;
   ex: string[];
 };
 
 export type ParsedWorkout = {
   title: string;
-  date: string;
+  date: string | null;
   sections: Section[];
 };
 
