@@ -149,14 +149,6 @@ const parseDescription = (buf: PBuf) => {
   };
 };
 
-export const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
-  const { result, errors } = parseDraft(w.ex.join("\n"));
-  errors.forEach((err) => {
-    throw err;
-  });
-  return { title: w.title, date: w.date, sections: result };
-};
-
 export const workoutVolume = (sections: Section[]) => {
   let sum = 0;
   for (const s of sections) {

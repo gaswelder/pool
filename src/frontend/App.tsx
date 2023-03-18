@@ -1,6 +1,7 @@
 import styled from "styled-components";
-import { parseJSONWorkout } from "../parser/parser";
+import { parseDraft } from "../parser/parser";
 import { toErr } from "../ts";
+import { ParsedWorkout, WorkoutFromJSON } from "../types";
 import { A, useLocation } from "./A";
 import { api } from "./api";
 import { Draft } from "./Draft";
@@ -55,6 +56,14 @@ export const App = () => {
       <Content />
     </AppDiv>
   );
+};
+
+const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
+  const { result, errors } = parseDraft(w.ex.join("\n"));
+  errors.forEach((err) => {
+    throw err;
+  });
+  return { ...w, sections: result };
 };
 
 const Content = () => {

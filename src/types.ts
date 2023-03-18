@@ -1,4 +1,5 @@
 export type WorkoutFromJSON = {
+  id: string;
   title: string;
   ex: string[];
   created: string;
@@ -7,6 +8,7 @@ export type WorkoutFromJSON = {
 };
 
 export type ParsedWorkout = {
+  id: string;
   title: string;
   sections: Section[];
   created: string;

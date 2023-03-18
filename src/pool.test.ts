@@ -1,11 +1,19 @@
 import chai from "chai";
 import * as fs from "fs";
-import { parseDraft, parseJSONWorkout, workoutVolume } from "./parser/parser";
+import { parseDraft, workoutVolume } from "./parser/parser";
+import { ParsedWorkout, WorkoutFromJSON } from "./types";
 
 const assert = chai.assert;
 
 describe("parser", () => {
   const db = JSON.parse(fs.readFileSync("data/pool.json").toString());
+  const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
+    const { result, errors } = parseDraft(w.ex.join("\n"));
+    errors.forEach((err) => {
+      throw err;
+    });
+    return { ...w, sections: result };
+  };
   db.workouts.forEach((w: any) => {
     it(w.title, () => {
       parseJSONWorkout(w);

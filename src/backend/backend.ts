@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as t from "runtypes";
 import { toErr } from "../ts";
 import { WorkoutFromJSON } from "../types";
+import * as crypto from "crypto";
 
 express()
   .use(express.static("build"))
@@ -29,10 +30,10 @@ express()
 
 const table = (name: string) => {
   const data = JSON.parse(fs.readFileSync(`data/${name}.json`).toString());
-  return data.records;
+  return data.records as WorkoutFromJSON[];
 };
 
-const writeTable = (name: string, records: unknown[]) => {
+const writeTable = (name: string, records: WorkoutFromJSON[]) => {
   fs.copyFileSync(
     `data/${name}.json`,
     `data/backup-${Date.now()}-${name}.json`
@@ -40,27 +41,14 @@ const writeTable = (name: string, records: unknown[]) => {
   fs.writeFileSync(`data/${name}.json`, JSON.stringify({ records }, null, 2));
 };
 
-const get = () => {
-  return {
-    archive: table("archive") as WorkoutFromJSON[],
-    planned: table("planned") as WorkoutFromJSON[],
-    workouts: table("workouts") as WorkoutFromJSON[],
-  };
-};
-
-const flush = (db: {
-  archive: WorkoutFromJSON[];
-  planned: WorkoutFromJSON[];
-  workouts: WorkoutFromJSON[];
-}) => {
-  writeTable("archive", db.archive);
-  writeTable("planned", db.planned);
-  writeTable("workouts", db.workouts);
-};
-
 const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
   async getWorkouts() {
-    return get();
+    const t = table("data");
+    return {
+      archive: t.filter((x) => x.archived),
+      planned: t.filter((x) => !x.archived && !x.swam),
+      workouts: t.filter((x) => !x.archived && x.swam),
+    };
   },
 
   async addPlan(arg: unknown) {
@@ -70,25 +58,30 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
         text: t.String,
       })
       .check(arg);
-    const db = get();
-    db.planned.push({
+    const id = crypto.createHash("md5").update(JSON.stringify(w)).digest("hex");
+    const tbl = table("data");
+    tbl.push({
+      id,
       created: new Date().toISOString(),
       title: w.title,
       ex: w.text.split("\n"),
     });
-    flush(db);
+    writeTable("data", tbl);
   },
 
   async archive(args: unknown) {
-    const db = get();
     const id = t.Record({ id: t.String }).check(args).id;
-    const pos = db.workouts.findIndex((x) => x.title == id);
-    if (pos < 0) {
+    console.log("archive", id);
+    const tbl = table("data");
+    const w = tbl.find((x) => x.id == id);
+    if (!w) {
       throw new Error(`not found`);
     }
-    db.archive.push(db.workouts[pos]);
-    db.workouts.splice(pos, 1);
-    flush(db);
+    if (w.archived) {
+      throw new Error(`already archived`);
+    }
+    w.archived = new Date().toISOString();
+    writeTable("data", tbl);
   },
 };
 

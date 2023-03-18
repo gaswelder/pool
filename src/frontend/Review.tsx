@@ -37,10 +37,10 @@ export const Review = ({ workouts, onArchive }: P) => {
         .map((workout) => {
           return (
             <Collapsible
-              key={workout.title}
+              key={workout.id}
               header={() => (
                 <Title>
-                  {workout.title || workout.swam}{" "}
+                  {workout.id} {workout.title || workout.swam}{" "}
                   <span>{workoutVolume(workout.sections)} m</span>
                 </Title>
               )}
@@ -53,7 +53,7 @@ export const Review = ({ workouts, onArchive }: P) => {
                       disabled={archiving}
                       onClick={async () => {
                         setArchiving(true);
-                        await onArchive(workout.title);
+                        await onArchive(workout.id);
                         setArchiving(false);
                       }}
                     >
