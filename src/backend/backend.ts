@@ -33,6 +33,28 @@ const table = (name: string) => {
   return data.records as WorkoutFromJSON[];
 };
 
+const favs = () => {
+  try {
+    const data = JSON.parse(fs.readFileSync(`data/favorites.json`).toString());
+    return data as string[];
+  } catch (err) {
+    return [] as string[];
+  }
+};
+
+const writeFavs = (favs: string[]) => {
+  const name = "favorites";
+  try {
+    fs.copyFileSync(
+      `data/${name}.json`,
+      `data/backup-${Date.now()}-${name}.json`
+    );
+  } catch (err) {
+    console.log(err);
+  }
+  fs.writeFileSync(`data/${name}.json`, JSON.stringify(favs, null, 2));
+};
+
 const writeTable = (name: string, records: WorkoutFromJSON[]) => {
   fs.copyFileSync(
     `data/${name}.json`,
@@ -48,6 +70,7 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       archive: t.filter((x) => x.archived),
       planned: t.filter((x) => !x.archived && !x.swam),
       workouts: t.filter((x) => !x.archived && x.swam),
+      favorites: favs(),
     };
   },
 
@@ -83,6 +106,24 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
     w.archived = new Date().toISOString();
     writeTable("data", tbl);
   },
+
+  async setFavorite(args0: unknown) {
+    const args = t.Record({ ex: t.String, fav: t.Boolean }).check(args0);
+    const f = favs();
+    const pos = f.indexOf(args.ex);
+    if (args.fav) {
+      if (pos >= 0) {
+        return;
+      }
+      f.push(args.ex);
+    } else {
+      if (pos < 0) {
+        return;
+      }
+      f.splice(pos, 1);
+    }
+    writeFavs(f);
+  },
 };
 
 const dispatch = async (body: unknown) => {
@@ -95,6 +136,7 @@ const dispatch = async (body: unknown) => {
     const { method, params } = t
       .Record({ method: t.String, params: t.Unknown.optional() })
       .check(body);
+    console.log(method, params);
     return ok(await methods[method](params));
   } catch (any) {
     const e = toErr(any);

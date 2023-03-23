@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import styled from "styled-components";
+import { exString } from "../ex-string";
 import { workoutVolume } from "../parser/parser";
 import { Section } from "../types";
 import bracket from "./Left_square_bracket.svg";
@@ -40,24 +41,26 @@ const Table = styled.table`
 
 type P = {
   sections: Section[];
+  favorites: string[];
+  onFavChange: (ex: string, fav: boolean) => void;
 };
-export const Workout = ({ sections }: P) => {
+export const Workout = ({ sections, favorites, onFavChange }: P) => {
   const haveRepeats = sections.some((x) => x.repeats > 1);
   return (
     <Table>
       <tbody>
-        {sections.map((section, i) => {
+        {sections.map((section, sectionIndex) => {
           return (
-            <Fragment key={i}>
+            <Fragment key={sectionIndex}>
               {section.name && (
                 <tr className="section-name">
                   <th colSpan={haveRepeats ? 3 : 2}>{section.name}</th>
                 </tr>
               )}
-              {section.ex.map((ex, j) => {
+              {section.ex.map((ex, exerciseIndex) => {
                 return (
-                  <tr key={`${j}`}>
-                    {j == 0 && haveRepeats && (
+                  <tr key={exerciseIndex}>
+                    {exerciseIndex == 0 && haveRepeats && (
                       <td rowSpan={section.ex.length} className="repeats">
                         {section.repeats > 1 && (
                           <RepeatsContainer>
@@ -83,6 +86,15 @@ export const Workout = ({ sections }: P) => {
                       {ex.equipment.map((item) => (
                         <Equipment key={item} id={item} />
                       ))}
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={favorites.includes(exString(ex))}
+                        onChange={(e) => {
+                          onFavChange(exString(ex), e.target.checked);
+                        }}
+                      />
                     </td>
                   </tr>
                 );

@@ -23,9 +23,11 @@ const Title = styled.div`
 type P = {
   workouts: ParsedWorkout[];
   onArchive: (id: string) => void;
+  favorites: string[];
+  onFavChange: (ex: string, fav: boolean) => void;
 };
 
-export const Review = ({ workouts, onArchive }: P) => {
+export const Review = ({ workouts, onArchive, favorites, onFavChange }: P) => {
   const [archiving, setArchiving] = useState(false);
   const now = new Date().toISOString();
   return (
@@ -47,7 +49,11 @@ export const Review = ({ workouts, onArchive }: P) => {
               content={() => {
                 return (
                   <ContainerDiv>
-                    <Workout sections={workout.sections} />
+                    <Workout
+                      sections={workout.sections}
+                      favorites={favorites}
+                      onFavChange={onFavChange}
+                    />
                     <button
                       type="button"
                       disabled={archiving}

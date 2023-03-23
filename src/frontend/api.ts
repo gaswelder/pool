@@ -20,7 +20,9 @@ export const api = {
     call("getWorkouts") as Promise<{
       planned: WorkoutFromJSON[];
       workouts: WorkoutFromJSON[];
+      favorites: string[];
     }>,
   addPlan: (w: { title: string; text: string }) => call("addPlan", w),
   archive: (id: string) => call("archive", { id }),
+  setFavorite: (ex: string, fav: boolean) => call("setFavorite", { ex, fav }),
 };

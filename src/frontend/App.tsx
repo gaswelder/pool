@@ -75,7 +75,15 @@ const Content = () => {
   switch (location.pathname) {
     case "/":
     case "/planned":
-      return <Planned planned={db.planned} />;
+      return (
+        <Planned
+          planned={db.planned}
+          favorites={db.favorites}
+          onFavChange={(s, fav) => {
+            api.setFavorite(s, fav).then(reload);
+          }}
+        />
+      );
     case "/draft":
       return (
         <Draft
@@ -97,6 +105,10 @@ const Content = () => {
             await api.archive(id);
             toast("Archived");
             await reload();
+          }}
+          favorites={db.favorites}
+          onFavChange={(s, fav) => {
+            api.setFavorite(s, fav).then(reload);
           }}
         />
       );
