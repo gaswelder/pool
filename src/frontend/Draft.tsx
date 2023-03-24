@@ -21,9 +21,11 @@ const TwoDiv = styled.div`
 
 type P = {
   onAdd: (w: { title: string; text: string }) => Promise<void>;
+  favorites: string[];
+  onFavChange: (ex: string, fav: boolean) => void;
 };
 
-export const Draft = ({ onAdd }: P) => {
+export const Draft = ({ onAdd, favorites, onFavChange }: P) => {
   const [title, setTitle] = useState("");
   const [text, setText] = useState(`-- warmup
 4 x 100 easy flutter kick
@@ -62,7 +64,11 @@ export const Draft = ({ onAdd }: P) => {
           </DraftTextarea>
           {result && (
             <WorkoutContainer>
-              <Workout sections={result} />
+              <Workout
+                sections={result}
+                favorites={favorites}
+                onFavChange={onFavChange}
+              />
             </WorkoutContainer>
           )}
         </TwoDiv>

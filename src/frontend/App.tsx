@@ -95,6 +95,10 @@ const Content = () => {
               alert(toErr(err).message);
             }
           }}
+          favorites={db.favorites}
+          onFavChange={(s, fav) => {
+            api.setFavorite(s, fav).then(reload);
+          }}
         />
       );
     case "/review":
