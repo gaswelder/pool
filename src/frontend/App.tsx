@@ -60,7 +60,7 @@ export const App = () => {
 };
 
 const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
-  const { result, errors } = parseDraft(w.ex.join("\n"));
+  const { result, errors } = parseDraft(w.lines.join("\n"));
   errors.forEach((err) => {
     throw err;
   });

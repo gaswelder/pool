@@ -28,7 +28,7 @@ const writeTable = (name: string, records: WorkoutFromJSON[]) => {
       lines.push(`swam: ${w.swam || ""}`);
       lines.push(`archived: ${w.archived || ""}`);
       lines.push("");
-      for (const e of w.ex) {
+      for (const e of w.lines) {
         lines.push(e);
       }
       lines.push("\n");

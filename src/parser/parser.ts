@@ -205,14 +205,14 @@ export const parseArchive = (archive: string) => {
       created: props.created || now.toISOString(),
       swam: props.swam || defswam(),
       archived: props.archived || "",
-      ex: [] as string[],
+      lines: [] as string[],
     };
     while (lines.length > 0 && !lines[0].startsWith("##")) {
       const line = lines.shift();
       if (!line) {
         continue;
       }
-      w.ex.push(line);
+      w.lines.push(line);
     }
     ww.push(w);
   }

@@ -1,19 +1,19 @@
 export type WorkoutFromJSON = {
   id: string;
   title: string;
-  ex: string[];
   created: string;
   swam?: string;
   archived?: string;
+  lines: string[];
 };
 
 export type ParsedWorkout = {
   id: string;
   title: string;
-  sections: Section[];
   created: string;
   swam?: string;
   archived?: string;
+  sections: Section[];
 };
 
 export type Section = {

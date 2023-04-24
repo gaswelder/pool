@@ -20,8 +20,8 @@ export const Planned = ({ planned, favorites, onFavChange }: P) => {
     <>
       <h3>Planned</h3>
       <p>{planned.length} workouts</p>
-      {planned.map(({ title, ex }) => {
-        const { result, errors } = parseDraft(ex.join("\n"));
+      {planned.map(({ title, lines }) => {
+        const { result, errors } = parseDraft(lines.join("\n"));
         return (
           <Collapsible
             key={title}
