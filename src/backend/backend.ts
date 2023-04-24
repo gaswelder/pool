@@ -1,9 +1,8 @@
+import * as crypto from "crypto";
 import express from "express";
-import * as fs from "fs";
 import * as t from "runtypes";
 import { toErr } from "../ts";
-import { WorkoutFromJSON } from "../types";
-import * as crypto from "crypto";
+import { loadFavs, loadWorkouts, saveFavs, saveWorkouts } from "./db";
 
 express()
   .use(express.static("build"))
@@ -28,49 +27,14 @@ express()
   })
   .listen(2346);
 
-const table = (name: string) => {
-  const data = JSON.parse(fs.readFileSync(`data/${name}.json`).toString());
-  return data.records as WorkoutFromJSON[];
-};
-
-const favs = () => {
-  try {
-    const data = JSON.parse(fs.readFileSync(`data/favorites.json`).toString());
-    return data as string[];
-  } catch (err) {
-    return [] as string[];
-  }
-};
-
-const writeFavs = (favs: string[]) => {
-  const name = "favorites";
-  try {
-    fs.copyFileSync(
-      `data/${name}.json`,
-      `data/backup-${Date.now()}-${name}.json`
-    );
-  } catch (err) {
-    console.log(err);
-  }
-  fs.writeFileSync(`data/${name}.json`, JSON.stringify(favs, null, 2));
-};
-
-const writeTable = (name: string, records: WorkoutFromJSON[]) => {
-  fs.copyFileSync(
-    `data/${name}.json`,
-    `data/backup-${Date.now()}-${name}.json`
-  );
-  fs.writeFileSync(`data/${name}.json`, JSON.stringify({ records }, null, 2));
-};
-
 const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
   async getWorkouts() {
-    const t = table("data");
+    const t = loadWorkouts();
     return {
       archive: t.filter((x) => x.archived),
       planned: t.filter((x) => !x.archived && !x.swam),
       workouts: t.filter((x) => !x.archived && x.swam),
-      favorites: favs(),
+      favorites: loadFavs(),
     };
   },
 
@@ -82,20 +46,19 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       })
       .check(arg);
     const id = crypto.createHash("md5").update(JSON.stringify(w)).digest("hex");
-    const tbl = table("data");
+    const tbl = loadWorkouts();
     tbl.push({
       id,
       created: new Date().toISOString(),
       title: w.title,
       ex: w.text.split("\n"),
     });
-    writeTable("data", tbl);
+    saveWorkouts(tbl);
   },
 
   async archive(args: unknown) {
     const id = t.Record({ id: t.String }).check(args).id;
-    console.log("archive", id);
-    const tbl = table("data");
+    const tbl = loadWorkouts();
     const w = tbl.find((x) => x.id == id);
     if (!w) {
       throw new Error(`not found`);
@@ -104,12 +67,12 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       throw new Error(`already archived`);
     }
     w.archived = new Date().toISOString();
-    writeTable("data", tbl);
+    saveWorkouts(tbl);
   },
 
   async setFavorite(args0: unknown) {
     const args = t.Record({ ex: t.String, fav: t.Boolean }).check(args0);
-    const f = favs();
+    const f = loadFavs();
     const pos = f.indexOf(args.ex);
     if (args.fav) {
       if (pos >= 0) {
@@ -122,7 +85,7 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       }
       f.splice(pos, 1);
     }
-    writeFavs(f);
+    saveFavs(f);
   },
 };
 
