@@ -42,7 +42,7 @@ export const Review = ({ workouts, onArchive, favorites, onFavChange }: P) => {
               key={workout.id}
               header={() => (
                 <Title>
-                  {workout.id} {workout.title || workout.swam}{" "}
+                  {workout.title || workout.swam}{" "}
                   <span>{workoutVolume(workout.sections)} m</span>
                 </Title>
               )}
