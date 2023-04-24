@@ -5,6 +5,7 @@ export type WorkoutFromJSON = {
   swam?: string;
   archived?: string;
   lines: string[];
+  comments: string[];
 };
 
 export type ParsedWorkout = {

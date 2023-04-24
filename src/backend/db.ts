@@ -31,6 +31,10 @@ const writeTable = (name: string, records: WorkoutFromJSON[]) => {
       for (const e of w.lines) {
         lines.push(e);
       }
+      lines.push("");
+      for (const c of w.comments) {
+        lines.push("// " + c);
+      }
       lines.push("\n");
       return lines;
     })

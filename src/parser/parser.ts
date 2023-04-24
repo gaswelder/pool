@@ -206,13 +206,22 @@ export const parseArchive = (archive: string) => {
       swam: props.swam || defswam(),
       archived: props.archived || "",
       lines: [] as string[],
+      comments: [] as string[],
     };
-    while (lines.length > 0 && !lines[0].startsWith("##")) {
+    while (
+      lines.length > 0 &&
+      !lines[0].startsWith("##") &&
+      !lines[0].startsWith("//")
+    ) {
       const line = lines.shift();
       if (!line) {
         continue;
       }
       w.lines.push(line);
+    }
+    while (lines.length > 0 && lines[0].startsWith("//")) {
+      const line = lines.shift()!;
+      w.comments.push(line.substring(2, line.length).trim());
     }
     ww.push(w);
   }

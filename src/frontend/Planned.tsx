@@ -20,15 +20,15 @@ export const Planned = ({ planned, favorites, onFavChange }: P) => {
     <>
       <h3>Planned</h3>
       <p>{planned.length} workouts</p>
-      {planned.map(({ title, lines }) => {
-        const { result, errors } = parseDraft(lines.join("\n"));
+      {planned.map((w) => {
+        const { result, errors } = parseDraft(w.lines.join("\n"));
         return (
           <Collapsible
-            key={title}
+            key={w.title}
             header={() => (
               <Title>
                 {errors.length > 0 && "!"}
-                {title} <span>{workoutVolume(result)} m</span>
+                {w.title} <span>{workoutVolume(result)} m</span>
               </Title>
             )}
             content={() => (
@@ -38,7 +38,7 @@ export const Planned = ({ planned, favorites, onFavChange }: P) => {
                   favorites={favorites}
                   onFavChange={onFavChange}
                 />
-                <textarea>comments</textarea>
+                <textarea value={w.comments.join("\n")} />
                 <button type="button">Update</button>
                 <button type="button">Archive</button>
               </div>

@@ -52,6 +52,7 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       created: new Date().toISOString(),
       title: w.title,
       lines: w.text.split("\n"),
+      comments: [],
     });
     saveWorkouts(tbl);
   },
@@ -66,6 +67,7 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
           created: t.String,
           swam: t.String,
           archived: t.String,
+          comments: t.Array(t.String),
         })
       )
       .check(args);
