@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { parseArchive } from "../parser/parser";
 import { WorkoutFromJSON } from "../types";
 
 export const loadWorkouts = () => read(); // table("data");
@@ -10,44 +11,7 @@ const table = (name: string) => {
 };
 
 const read = () => {
-  const ww = [] as WorkoutFromJSON[];
-  const lines = fs.readFileSync(`data/workouts.txt`).toString().split(/\n+/);
-  const r = (prefix: string) => {
-    const line = lines.shift();
-    if (!line) {
-      throw new Error(`expected ${prefix}, got end of lines`);
-    }
-    if (!line.startsWith(prefix)) {
-      throw new Error(`expected ${prefix}, got ${line}`);
-    }
-    return line.substring(prefix.length, line.length);
-  };
-  const rval = (key: string) => r(`${key}: `);
-  const rtitle = () => r("## ");
-  while (lines.length > 0) {
-    const title = rtitle();
-    const id = rval("id");
-    const created = rval("created");
-    const swam = rval("swam");
-    const archived = rval("archived");
-    const w = {
-      title,
-      id,
-      created,
-      swam,
-      archived,
-      ex: [] as string[],
-    };
-    while (lines.length > 0 && !lines[0].startsWith("##")) {
-      const line = lines.shift();
-      if (!line) {
-        continue;
-      }
-      w.ex.push(line);
-    }
-    ww.push(w);
-  }
-  return ww;
+  return parseArchive(fs.readFileSync(`data/workouts.txt`).toString());
 };
 
 const writeTable = (name: string, records: WorkoutFromJSON[]) => {

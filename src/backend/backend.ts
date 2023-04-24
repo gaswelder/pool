@@ -31,7 +31,7 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
   async getWorkouts() {
     const t = loadWorkouts();
     return {
-      archive: t.filter((x) => x.archived),
+      archive: t.filter((x) => x.archived && x.archived != ""),
       planned: t.filter((x) => !x.archived && !x.swam),
       workouts: t.filter((x) => !x.archived && x.swam),
       favorites: loadFavs(),
@@ -53,6 +53,26 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       title: w.title,
       ex: w.text.split("\n"),
     });
+    saveWorkouts(tbl);
+  },
+
+  async import(args: unknown) {
+    const ww = t
+      .Array(
+        t.Record({
+          id: t.String,
+          title: t.String,
+          ex: t.Array(t.String),
+          created: t.String,
+          swam: t.String,
+          archived: t.String,
+        })
+      )
+      .check(args);
+    const tbl = loadWorkouts();
+    for (const w of ww) {
+      tbl.push(w);
+    }
     saveWorkouts(tbl);
   },
 

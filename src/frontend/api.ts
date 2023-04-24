@@ -25,4 +25,5 @@ export const api = {
   addPlan: (w: { title: string; text: string }) => call("addPlan", w),
   archive: (id: string) => call("archive", { id }),
   setFavorite: (ex: string, fav: boolean) => call("setFavorite", { ex, fav }),
+  import: (ww: WorkoutFromJSON[]) => call("import", ww),
 };

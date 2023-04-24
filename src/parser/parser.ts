@@ -1,5 +1,5 @@
 import { toErr } from "../ts";
-import { ParsedEx, ParsedWorkout, Section, WorkoutFromJSON } from "../types";
+import { ParsedEx, Section, WorkoutFromJSON } from "../types";
 import { PBuf, pbuf } from "./pbuf";
 
 export const parseDraft = (draft: string) => {
@@ -164,3 +164,57 @@ export const workoutVolume = (sections: Section[]) => {
 // const truthy = <T>(x: null | undefined | T): x is T => {
 //   return x !== null && x !== undefined;
 // };
+
+export const parseArchive = (archive: string) => {
+  const ww = [] as WorkoutFromJSON[];
+  const lines = archive.split(/\n+/).filter((line) => line !== "");
+  const r = (prefix: string) => {
+    const line = lines.shift();
+    if (!line) {
+      throw new Error(`expected ${prefix}, got end of lines`);
+    }
+    if (!line.startsWith(prefix)) {
+      throw new Error(`expected ${prefix}, got ${line}`);
+    }
+    return line.substring(prefix.length, line.length);
+  };
+  let counter = 1;
+  while (lines.length > 0) {
+    const props = {} as Record<string, string>;
+    const title = r("## ");
+    for (;;) {
+      const line = lines[0];
+      if (!line) {
+        break;
+      }
+      const m = line.match(/^(\w+): (.*?)$/);
+      if (!m) {
+        break;
+      }
+      lines.shift();
+      props[m[1]] = m[2];
+    }
+    const now = new Date();
+    const defswam = () => {
+      const m = title.match(/(\d\d\d\d-\d\d-\d\d)/);
+      return m ? m[1] : "";
+    };
+    const w = {
+      title,
+      id: props.id || now.getTime() + "-" + counter++,
+      created: props.created || now.toISOString(),
+      swam: props.swam || defswam(),
+      archived: props.archived || "",
+      ex: [] as string[],
+    };
+    while (lines.length > 0 && !lines[0].startsWith("##")) {
+      const line = lines.shift();
+      if (!line) {
+        continue;
+      }
+      w.ex.push(line);
+    }
+    ww.push(w);
+  }
+  return ww;
+};
