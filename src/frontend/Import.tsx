@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { parseArchive } from "../parser/parser";
+import { parseArchive, parseDraft, workoutVolume } from "../parser/parser";
 import { toErr } from "../ts";
 import { WorkoutFromJSON } from "../types";
 import { toast } from "./toast";
@@ -16,11 +16,19 @@ type P = {
 
 export const Import = ({ onAdd }: P) => {
   const [text, setText] = useState("");
-  const { workouts, error } = useMemo(() => {
+  const { workouts, errors } = useMemo(() => {
     try {
-      return { workouts: parseArchive(text), error: null };
+      const workouts = parseArchive(text).map((x) => {
+        const { result, errors } = parseDraft(x.lines.join("\n"));
+        return {
+          ...x,
+          sections: result,
+          errors,
+        };
+      });
+      return { workouts, errors: workouts.flatMap((x) => x.errors) };
     } catch (err) {
-      return { workouts: [], error: toErr(err) };
+      return { workouts: [], errors: [toErr(err)] };
     }
   }, [text]);
   return (
@@ -41,9 +49,19 @@ export const Import = ({ onAdd }: P) => {
             setText(e.target.value);
           }}
         />
-        {error && <p style={{ color: "red" }}>{error.message}</p>}
-        <button disabled={error != null}>Save</button>
+        <p>
+          {workouts.length} workouts,{" "}
+          {sum(workouts.map((w) => workoutVolume(w.sections)))} m
+        </p>
+        {errors.map((error, i) => (
+          <p key={i} style={{ color: "red" }}>
+            {error.message}
+          </p>
+        ))}
+        <button disabled={errors.length > 0}>Save</button>
       </form>
     </>
   );
 };
+
+const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
