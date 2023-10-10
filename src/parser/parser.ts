@@ -24,6 +24,15 @@ export const parseDraft = (draft: string) => {
       implicitSection = false;
       return;
     }
+    if (t.startsWith("#")) {
+      let i = 0;
+      while (t[i] == "#") {
+        i++;
+      }
+      startSection(t.substring(i, t.length).trim());
+      implicitSection = false;
+      return;
+    }
     try {
       const r = parseLine(t);
       if ("name" in r) {
