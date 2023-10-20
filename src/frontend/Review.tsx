@@ -7,8 +7,6 @@ import { Theme } from "./theme";
 import { Workout } from "./Workout";
 
 const ContainerDiv = styled.div`
-  display: flex;
-  flex-direction: column;
   & button {
     margin-top: ${Theme.h};
     margin-left: auto;

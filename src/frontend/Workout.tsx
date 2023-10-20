@@ -22,7 +22,9 @@ const RepeatsContainer = styled.div`
 `;
 
 const Table = styled.table`
-  width: 100%;
+  table {
+    min-width: 20em;
+  }
   td,
   th {
     padding: 10px 4px;
