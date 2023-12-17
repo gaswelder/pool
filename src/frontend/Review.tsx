@@ -1,4 +1,3 @@
-import { useState } from "react";
 import styled from "styled-components";
 import { workoutVolume } from "../parser/parser";
 import { ParsedWorkout } from "../types";
@@ -20,11 +19,9 @@ const Title = styled.div`
 
 type P = {
   workouts: ParsedWorkout[];
-  onArchive: (id: string) => void;
 };
 
-export const Review = ({ workouts, onArchive }: P) => {
-  const [archiving, setArchiving] = useState(false);
+export const Review = ({ workouts }: P) => {
   const now = new Date().toISOString();
   return (
     <>
@@ -42,24 +39,11 @@ export const Review = ({ workouts, onArchive }: P) => {
                   <span>{workoutVolume(workout.sections)} m</span>
                 </Title>
               )}
-              content={() => {
-                return (
-                  <ContainerDiv>
-                    <Workout sections={workout.sections} />
-                    <button
-                      type="button"
-                      disabled={archiving}
-                      onClick={async () => {
-                        setArchiving(true);
-                        await onArchive(workout.id);
-                        setArchiving(false);
-                      }}
-                    >
-                      Archive
-                    </button>
-                  </ContainerDiv>
-                );
-              }}
+              content={() => (
+                <ContainerDiv>
+                  <Workout sections={workout.sections} />
+                </ContainerDiv>
+              )}
             />
           );
         })}

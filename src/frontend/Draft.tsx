@@ -19,12 +19,7 @@ const TwoDiv = styled.div`
   }
 `;
 
-type P = {
-  onAdd: (w: { title: string; text: string }) => Promise<void>;
-};
-
-export const Draft = ({ onAdd }: P) => {
-  const [title, setTitle] = useState("");
+export const Draft = () => {
   const [text, setText] = useState(`-- warmup
 4 x 100 easy flutter kick
 4 x 100 easy freestyle
@@ -37,21 +32,7 @@ export const Draft = ({ onAdd }: P) => {
   return (
     <>
       <h3>Workout draft</h3>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          await onAdd({ title, text });
-          location.href = "planned";
-        }}
-      >
-        <input
-          placeholder="title"
-          required
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-        />
+      <form>
         <TwoDiv>
           <DraftTextarea
             onChange={(e) => {
@@ -71,7 +52,6 @@ export const Draft = ({ onAdd }: P) => {
             {err.message}
           </p>
         ))}
-        <button disabled={errors.length > 0}>Save</button>
       </form>
     </>
   );

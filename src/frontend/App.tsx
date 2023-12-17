@@ -5,7 +5,6 @@ import { ParsedWorkout, WorkoutFromJSON } from "../types";
 import { A, useLocation } from "./A";
 import { api } from "./api";
 import { Draft } from "./Draft";
-import { Import } from "./Import";
 import { Planned } from "./Planned";
 import { Review } from "./Review";
 import { Theme } from "./theme";
@@ -53,7 +52,7 @@ export const App = () => {
   return (
     <AppDiv>
       <A href="draft">Draft</A> | <A href="planned">Planned</A> |{" "}
-      <A href="review">Review</A> | <A href="import">Import</A>
+      <A href="review">Review</A>
       <Content />
     </AppDiv>
   );
@@ -78,37 +77,9 @@ const Content = () => {
     case "/planned":
       return <Planned planned={db.planned} />;
     case "/draft":
-      return (
-        <Draft
-          onAdd={async (draft) => {
-            try {
-              await api.addPlan(draft);
-              await reload();
-            } catch (err) {
-              alert(toErr(err).message);
-            }
-          }}
-        />
-      );
+      return <Draft />;
     case "/review":
-      return (
-        <Review
-          workouts={db.workouts.map(parseJSONWorkout)}
-          onArchive={async (id) => {
-            await api.archive(id);
-            toast("Archived");
-            await reload();
-          }}
-        />
-      );
-    case "/import":
-      return (
-        <Import
-          onAdd={async (ww) => {
-            await api.import(ww);
-          }}
-        />
-      );
+      return <Review workouts={db.workouts.map(parseJSONWorkout)} />;
     default:
       return <>unknown location: {location.pathname}</>;
   }

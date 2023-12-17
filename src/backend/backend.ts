@@ -1,8 +1,7 @@
-import * as crypto from "crypto";
 import express from "express";
 import * as t from "runtypes";
 import { toErr } from "../ts";
-import { loadWorkouts, saveWorkouts } from "./db";
+import { loadWorkouts } from "./db";
 
 express()
   .use(express.static("build"))
@@ -35,60 +34,6 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       planned: t.filter((x) => !x.archived && !x.swam),
       workouts: t.filter((x) => !x.archived && x.swam),
     };
-  },
-
-  async addPlan(arg: unknown) {
-    const w = t
-      .Record({
-        title: t.String,
-        text: t.String,
-      })
-      .check(arg);
-    const id = crypto.createHash("md5").update(JSON.stringify(w)).digest("hex");
-    const tbl = loadWorkouts();
-    tbl.push({
-      id,
-      created: new Date().toISOString(),
-      title: w.title,
-      lines: w.text.split("\n"),
-      comments: [],
-    });
-    saveWorkouts(tbl);
-  },
-
-  async import(args: unknown) {
-    const ww = t
-      .Array(
-        t.Record({
-          id: t.String,
-          title: t.String,
-          lines: t.Array(t.String),
-          created: t.String,
-          swam: t.String,
-          archived: t.String,
-          comments: t.Array(t.String),
-        })
-      )
-      .check(args);
-    const tbl = loadWorkouts();
-    for (const w of ww) {
-      tbl.push(w);
-    }
-    saveWorkouts(tbl);
-  },
-
-  async archive(args: unknown) {
-    const id = t.Record({ id: t.String }).check(args).id;
-    const tbl = loadWorkouts();
-    const w = tbl.find((x) => x.id == id);
-    if (!w) {
-      throw new Error(`not found`);
-    }
-    if (w.archived) {
-      throw new Error(`already archived`);
-    }
-    w.archived = new Date().toISOString();
-    saveWorkouts(tbl);
   },
 };
 
