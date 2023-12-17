@@ -1,7 +1,8 @@
 import express from "express";
+import * as fs from "fs";
 import * as t from "runtypes";
+import { parseArchive } from "../parser/parser";
 import { toErr } from "../ts";
-import { loadWorkouts } from "./db";
 
 express()
   .use(express.static("build"))
@@ -28,7 +29,7 @@ express()
 
 const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
   async getWorkouts() {
-    const t = loadWorkouts();
+    const t = parseArchive(fs.readFileSync(`data/workouts.txt`).toString());
     return {
       archive: t.filter((x) => x.archived && x.archived != ""),
       planned: t.filter((x) => !x.archived && !x.swam),
