@@ -43,10 +43,8 @@ const Table = styled.table`
 
 type P = {
   sections: Section[];
-  favorites: string[];
-  onFavChange: (ex: string, fav: boolean) => void;
 };
-export const Workout = ({ sections, favorites, onFavChange }: P) => {
+export const Workout = ({ sections }: P) => {
   const haveRepeats = sections.some((x) => x.repeats > 1);
   return (
     <Table>
@@ -56,7 +54,7 @@ export const Workout = ({ sections, favorites, onFavChange }: P) => {
             <Fragment key={sectionIndex}>
               {section.name && (
                 <tr className="section-name">
-                  <th colSpan={haveRepeats ? 3 : 2}>{section.name}</th>
+                  <th colSpan={haveRepeats ? 2 : 1}>{section.name}</th>
                 </tr>
               )}
               {section.ex.map((ex, exerciseIndex) => {
@@ -88,15 +86,6 @@ export const Workout = ({ sections, favorites, onFavChange }: P) => {
                       {ex.equipment.map((item) => (
                         <Equipment key={item} id={item} />
                       ))}
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={favorites.includes(exString(ex))}
-                        onChange={(e) => {
-                          onFavChange(exString(ex), e.target.checked);
-                        }}
-                      />
                     </td>
                   </tr>
                 );

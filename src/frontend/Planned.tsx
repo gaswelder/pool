@@ -11,11 +11,9 @@ const Title = styled.div`
 
 type P = {
   planned: WorkoutFromJSON[];
-  favorites: string[];
-  onFavChange: (ex: string, fav: boolean) => void;
 };
 
-export const Planned = ({ planned, favorites, onFavChange }: P) => {
+export const Planned = ({ planned }: P) => {
   return (
     <>
       <h3>Planned</h3>
@@ -33,11 +31,7 @@ export const Planned = ({ planned, favorites, onFavChange }: P) => {
             )}
             content={() => (
               <div>
-                <Workout
-                  sections={result}
-                  favorites={favorites}
-                  onFavChange={onFavChange}
-                />
+                <Workout sections={result} />
                 <textarea value={w.comments.join("\n")} />
                 <button type="button">Update</button>
                 <button type="button">Archive</button>

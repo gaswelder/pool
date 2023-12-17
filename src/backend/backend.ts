@@ -2,7 +2,7 @@ import * as crypto from "crypto";
 import express from "express";
 import * as t from "runtypes";
 import { toErr } from "../ts";
-import { loadFavs, loadWorkouts, saveFavs, saveWorkouts } from "./db";
+import { loadWorkouts, saveWorkouts } from "./db";
 
 express()
   .use(express.static("build"))
@@ -34,7 +34,6 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
       archive: t.filter((x) => x.archived && x.archived != ""),
       planned: t.filter((x) => !x.archived && !x.swam),
       workouts: t.filter((x) => !x.archived && x.swam),
-      favorites: loadFavs(),
     };
   },
 
@@ -90,24 +89,6 @@ const methods: Record<string, (x?: unknown) => Promise<unknown>> = {
     }
     w.archived = new Date().toISOString();
     saveWorkouts(tbl);
-  },
-
-  async setFavorite(args0: unknown) {
-    const args = t.Record({ ex: t.String, fav: t.Boolean }).check(args0);
-    const f = loadFavs();
-    const pos = f.indexOf(args.ex);
-    if (args.fav) {
-      if (pos >= 0) {
-        return;
-      }
-      f.push(args.ex);
-    } else {
-      if (pos < 0) {
-        return;
-      }
-      f.splice(pos, 1);
-    }
-    saveFavs(f);
   },
 };
 
