@@ -27,26 +27,23 @@ export const Review = ({ workouts }: P) => {
     <>
       <h3>Review</h3>
       <p>{workouts.length} workouts</p>
-      {workouts
-        .sort((a, b) => (a.swam || now).localeCompare(b.swam || now))
-        .map((workout) => {
-          return (
-            <Collapsible
-              key={workout.id}
-              header={() => (
-                <Title>
-                  {workout.title || workout.swam}{" "}
-                  <span>{workoutVolume(workout.sections)} m</span>
-                </Title>
-              )}
-              content={() => (
-                <ContainerDiv>
-                  <Workout sections={workout.sections} />
-                </ContainerDiv>
-              )}
-            />
-          );
-        })}
+      {workouts.map((workout, i) => {
+        return (
+          <Collapsible
+            key={i}
+            header={() => (
+              <Title>
+                {workout.title} <span>{workoutVolume(workout.sections)} m</span>
+              </Title>
+            )}
+            content={() => (
+              <ContainerDiv>
+                <Workout sections={workout.sections} />
+              </ContainerDiv>
+            )}
+          />
+        );
+      })}
     </>
   );
 };

@@ -43,9 +43,7 @@ archived:
 // Date estimated roughly
 // Could do only 5 with fins. 35, 33, 31, 34, 32 seconds in 50m.`);
     return {
-      archive: t.filter((x) => x.archived && x.archived != ""),
-      planned: t.filter((x) => !x.archived && !x.swam),
-      workouts: t.filter((x) => !x.archived && x.swam),
+      workouts: t,
     };
   },
 };

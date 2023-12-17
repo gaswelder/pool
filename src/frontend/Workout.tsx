@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import styled from "styled-components";
-import { exString } from "../ex-string";
 import { workoutVolume } from "../parser/parser";
 import { Section } from "../types";
 import bracket from "./Left_square_bracket.svg";
 import { Theme } from "./theme";
+import { ParsedEx } from "../types";
+
+export const exString = (ex: ParsedEx) => JSON.stringify(ex);
 
 const RepeatsContainer = styled.div`
   display: flex;
