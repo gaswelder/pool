@@ -3,7 +3,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { Theme } from "./theme";
 
-const HeaderDiv = styled.div`
+const Summary = styled.summary`
   padding: ${Theme.h} ${Theme.w};
   border: thin solid #d1dfec;
   cursor: pointer;
@@ -33,15 +33,16 @@ type P = {
 
 export const Collapsible = ({ header, content }: P) => {
   const [open, setOpen] = useState(false);
-  const toggle = () => setOpen((x) => !x);
   return (
-    <>
-      <HeaderDiv className={open ? "open" : ""} onClick={toggle}>
-        {header()}
-      </HeaderDiv>
+    <details
+      onToggle={(e) => {
+        setOpen((e.target as any).open);
+      }}
+    >
+      <Summary className={open ? "open" : ""}>{header()}</Summary>
       {open && (
         <ContentDiv className={open ? "open" : ""}>{content()}</ContentDiv>
       )}
-    </>
+    </details>
   );
 };
