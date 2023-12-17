@@ -1,11 +1,11 @@
 import chai from "chai";
 import * as fs from "fs";
-import { parseDraft, workoutVolume } from "./parser/parser";
+import { parseDraft, workoutVolume } from "./shorthand";
 import { ParsedWorkout, WorkoutFromJSON } from "./types";
 
 const assert = chai.assert;
 
-describe("parser", () => {
+describe("shorthand", () => {
   const db = JSON.parse(fs.readFileSync("data/pool.json").toString());
   const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
     const { result, errors } = parseDraft(w.ex.join("\n"));

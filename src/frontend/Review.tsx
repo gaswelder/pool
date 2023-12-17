@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { workoutVolume } from "../parser/parser";
-import { ParsedWorkout } from "../types";
+import { workoutVolume } from "../parser/shorthand";
+import { ParsedWorkout } from "../parser/types";
 import { Collapsible } from "./Collapsible";
 import { Theme } from "./theme";
 import { Workout } from "./Workout";

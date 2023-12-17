@@ -1,10 +1,10 @@
 import { Fragment } from "react";
 import styled from "styled-components";
-import { workoutVolume } from "../parser/parser";
-import { Section } from "../types";
+import { workoutVolume } from "../parser/shorthand";
+import { Section } from "../parser/types";
 import bracket from "./Left_square_bracket.svg";
 import { Theme } from "./theme";
-import { ParsedEx } from "../types";
+import { ParsedEx } from "../parser/types";
 
 export const exString = (ex: ParsedEx) => JSON.stringify(ex);
 

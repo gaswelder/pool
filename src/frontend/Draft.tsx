@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { parseDraft } from "../parser/parser";
+import { parseDraft } from "../parser/shorthand";
 import { Workout } from "./Workout";
 
 const DraftTextarea = styled.textarea`

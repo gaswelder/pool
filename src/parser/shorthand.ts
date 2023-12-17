@@ -1,5 +1,5 @@
 import { toErr } from "../ts";
-import { ParsedEx, Section, WorkoutFromJSON } from "../types";
+import { ParsedEx, Section, WorkoutFromJSON } from "./types";
 import { PBuf, pbuf } from "./pbuf";
 
 export const parseDraft = (draft: string) => {

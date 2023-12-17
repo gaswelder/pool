@@ -33,7 +33,7 @@
     "styled-components": "^5.3.8"
   },
   "scripts": {
-    "test": "ts-mocha src/pool.test.ts",
+    "test": "ts-mocha src/parser/*.test.ts",
     "dev": "parcel index.html",
     "build": "parcel build index.html"
   }

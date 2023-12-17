@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { parseDraft, workoutVolume } from "../parser/parser";
-import { WorkoutFromJSON } from "../types";
+import { parseDraft, workoutVolume } from "../parser/shorthand";
+import { WorkoutFromJSON } from "../parser/types";
 import { Collapsible } from "./Collapsible";
 import { Workout } from "./Workout";
 

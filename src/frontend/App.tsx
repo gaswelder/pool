@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { parseDraft } from "../parser/parser";
-import { ParsedWorkout, WorkoutFromJSON } from "../types";
+import { parseDraft } from "../parser/shorthand";
+import { ParsedWorkout, WorkoutFromJSON } from "../parser/types";
 import { A, useLocation } from "./A";
 import { Draft } from "./Draft";
 import { api } from "./api";
