@@ -7,6 +7,7 @@ import { api } from "./api";
 import { Theme } from "./theme";
 import { useResource } from "./use-resource";
 import { Review } from "./Review";
+import { useState } from "react";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -64,15 +65,23 @@ const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
 const Content = () => {
   const { data: db } = useResource(api.workouts, []);
   const { location } = useLocation();
+  const [workouts, setWorkouts] = useState([] as ParsedWorkout[]);
   if (!db) {
     return <>loading db</>;
   }
+
+  const generate = async () => {
+    setWorkouts(db.workouts.map((x) => parseJSONWorkout(x)));
+  };
   switch (location.pathname) {
     case "/":
       return (
         <>
           <Draft />
-          <Review workouts={db.workouts.map((x) => parseJSONWorkout(x))} />
+          <button type="button" onClick={generate}>
+            Generate
+          </button>
+          <Review workouts={workouts} />
         </>
       );
     default:
