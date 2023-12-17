@@ -1,15 +1,12 @@
 import styled from "styled-components";
 import { parseDraft } from "../parser/parser";
-import { toErr } from "../ts";
 import { ParsedWorkout, WorkoutFromJSON } from "../types";
 import { A, useLocation } from "./A";
-import { api } from "./api";
 import { Draft } from "./Draft";
-import { Planned } from "./Planned";
-import { Review } from "./Review";
+import { api } from "./api";
 import { Theme } from "./theme";
-import { toast } from "./toast";
 import { useResource } from "./use-resource";
+import { Review } from "./Review";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -51,8 +48,6 @@ const AppDiv = styled.div`
 export const App = () => {
   return (
     <AppDiv>
-      <A href="draft">Draft</A> | <A href="planned">Planned</A> |{" "}
-      <A href="review">Review</A>
       <Content />
     </AppDiv>
   );
@@ -67,19 +62,19 @@ const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
 };
 
 const Content = () => {
-  const { data: db, reload } = useResource(api.workouts, []);
+  const { data: db } = useResource(api.workouts, []);
   const { location } = useLocation();
   if (!db) {
     return <>loading db</>;
   }
   switch (location.pathname) {
     case "/":
-    case "/planned":
-      return <Planned planned={db.planned} />;
-    case "/draft":
-      return <Draft />;
-    case "/review":
-      return <Review workouts={db.workouts.map(parseJSONWorkout)} />;
+      return (
+        <>
+          <Draft />
+          <Review workouts={db.workouts.map((x) => parseJSONWorkout(x))} />
+        </>
+      );
     default:
       return <>unknown location: {location.pathname}</>;
   }
