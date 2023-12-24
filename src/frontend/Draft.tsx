@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { parseDraft } from "../parser/shorthand";
 import { WorkoutTable } from "./WorkoutTable";
+import { parseDraft } from "./draft";
 
 const DraftTextarea = styled.textarea`
   width: 60em;

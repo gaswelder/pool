@@ -1,5 +1,3 @@
-import { WorkoutFromJSON } from "../parser/types";
-
 const call = async (method: string, params?: unknown) => {
   const response = await fetch("http://localhost:2346/rpc", {
     method: "POST",

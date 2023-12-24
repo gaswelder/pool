@@ -1,5 +1,4 @@
 import { PBuf, pbuf } from "./pbuf";
-import { ParsedEx, Section } from "./types";
 
 export type ESet = ReturnType<typeof parseSet>;
 export type Line = ReturnType<typeof parseLine>;
@@ -73,78 +72,12 @@ export const parseLine = (line: string) => {
   throw new Error(`unknown line format: ${glance(line)}`);
 };
 
-const splitIntoSets = (draft: string) => {
-  const lines = draft
-    .split(/\n/)
-    .map((line) => line.trim())
-    .filter((line) => line != "");
-  const sets = [] as string[];
-  lines.forEach((line) => {
-    if (line.startsWith("-- ")) {
-      sets[sets.length] = line;
-    } else {
-      if (sets.length == 0) {
-        sets[0] = line;
-      } else {
-        sets[sets.length - 1] += "\n" + line;
-      }
-    }
-  });
-  return sets;
-};
-
-export const parseDraft = (draft: string) => {
-  const sets = splitIntoSets(draft);
-  return { result: sets.map(parseSet), errors: [] as Error[] };
-};
-
 const glance = (x: string) => {
   const n = 10;
   if (x.length <= n) {
     return x;
   }
   return x.substring(0, n) + "...";
-};
-
-const parseStepsLine = (s: string) => {
-  // 10 laps blabla + 10 laps bla
-  const buf = pbuf(s);
-  const steps = [] as ParsedEx[];
-  while (true) {
-    const a = buf.number();
-    if (a == "") {
-      throw new Error(`expected a number at "${buf.rest()}"`);
-    }
-    // 4x50 blabla #paddles
-    if (buf.times()) {
-      const b = buf.number();
-      if (b == "") {
-        throw new Error(`expected a number at "${buf.rest()}"`);
-      }
-      steps.push({
-        repeats: parseFloat(a),
-        amount: parseFloat(b),
-        ...parseDescription(buf),
-      });
-    } else {
-      // 50 blabla
-      steps.push({
-        repeats: 1,
-        amount: parseFloat(a),
-        ...parseDescription(buf),
-      });
-    }
-    if (buf.peek() == "+") {
-      buf.get();
-      buf.spaces();
-    } else {
-      break;
-    }
-  }
-  if (buf.rest() != "") {
-    throw new Error(`trailing string: "${buf.rest()}"`);
-  }
-  return steps;
 };
 
 const parseDescription = (buf: PBuf) => {
@@ -167,7 +100,3 @@ const parseDescription = (buf: PBuf) => {
     equipment: eqs,
   };
 };
-
-// const truthy = <T>(x: null | undefined | T): x is T => {
-//   return x !== null && x !== undefined;
-// };

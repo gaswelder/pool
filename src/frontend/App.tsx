@@ -1,11 +1,11 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { ESet, parseDraft } from "../parser/shorthand";
-import { ParsedWorkout } from "../parser/types";
+import { ESet } from "../parser/shorthand";
 import { useLocation } from "./A";
 import { Draft } from "./Draft";
 import { Review } from "./Review";
 import { Theme } from "./theme";
+import { parseDraft } from "./draft";
 
 const AppDiv = styled.div`
   background: #d1dfec;
