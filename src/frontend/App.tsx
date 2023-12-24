@@ -6,6 +6,7 @@ import { Draft } from "./Draft";
 import { Review } from "./Review";
 import { Theme } from "./theme";
 import { parseDraft } from "./draft";
+import { sst } from "./sets";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -54,24 +55,31 @@ export const App = () => {
 
 const Content = () => {
   const { location } = useLocation();
-  const [sets, setSets] = useState([] as ESet[]);
+  const [sets, setSets] = useState(`-- warmup
+  4 x 100 easy flutter kick
+  4 x 100 easy freestyle
+  -- 4 x main
+  100 underwater pull
+  400 butterfly
+  `);
+  const [ver, setVer] = useState(0);
 
-  const generate = async () => {
-    const t = parseDraft(`
--- 10 x Burning Unicorn (all with fins and time)
-50 max effort
-150 swim out, rest as needed
-`);
-  };
   switch (location.pathname) {
     case "/":
       return (
         <>
-          <Draft />
-          <button type="button" onClick={generate}>
+          <Draft key={ver} initialText={sets} />
+          <button
+            type="button"
+            onClick={() => {
+              const r = sst();
+              setSets(r[0].sets);
+              setVer((x) => x + 1);
+            }}
+          >
             Generate
           </button>
-          <Review sets={sets} />
+          <Review sets={parseDraft(sets).result} />
         </>
       );
     default:

@@ -19,19 +19,12 @@ const TwoDiv = styled.div`
   }
 `;
 
-export const Draft = () => {
-  const [text, setText] = useState(`-- warmup
-4 x 100 easy flutter kick
-4 x 100 easy freestyle
--- 4 x main
-100 underwater pull
-400 butterfly
-`);
+export const Draft = ({ initialText }: { initialText: string }) => {
+  const [text, setText] = useState(initialText);
   const { result, errors } = useMemo(() => parseDraft(text), [text]);
-
   return (
     <>
-      <h3>Workout draft</h3>
+      <h3>Draft</h3>
       <form>
         <TwoDiv>
           <DraftTextarea
