@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { parseDraft, workoutVolume } from "../parser/shorthand";
 import { WorkoutFromJSON } from "../parser/types";
 import { Collapsible } from "./Collapsible";
-import { Workout } from "./Workout";
+import { Set } from "./Set";
 
 const Title = styled.div`
   display: flex;
@@ -31,7 +31,7 @@ export const Planned = ({ planned }: P) => {
             )}
             content={() => (
               <div>
-                <Workout sections={result} />
+                <Set sections={result} />
                 <textarea value={w.comments.join("\n")} />
                 <button type="button">Update</button>
                 <button type="button">Archive</button>

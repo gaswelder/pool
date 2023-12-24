@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { parseDraft } from "../parser/shorthand";
-import { Workout } from "./Workout";
+import { WorkoutTable } from "./WorkoutTable";
 
 const DraftTextarea = styled.textarea`
   width: 60em;
@@ -43,7 +43,7 @@ export const Draft = () => {
           </DraftTextarea>
           {result && (
             <WorkoutContainer>
-              <Workout sections={result} />
+              <WorkoutTable workout={result} />
             </WorkoutContainer>
           )}
         </TwoDiv>

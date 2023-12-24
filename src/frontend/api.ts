@@ -14,11 +14,3 @@ const call = async (method: string, params?: unknown) => {
   }
   return body.data;
 };
-
-export const api = {
-  workouts: () =>
-    call("getWorkouts") as Promise<{
-      planned: WorkoutFromJSON[];
-      workouts: WorkoutFromJSON[];
-    }>,
-};

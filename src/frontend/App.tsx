@@ -1,13 +1,11 @@
-import styled from "styled-components";
-import { parseDraft } from "../parser/shorthand";
-import { ParsedWorkout, WorkoutFromJSON } from "../parser/types";
-import { A, useLocation } from "./A";
-import { Draft } from "./Draft";
-import { api } from "./api";
-import { Theme } from "./theme";
-import { useResource } from "./use-resource";
-import { Review } from "./Review";
 import { useState } from "react";
+import styled from "styled-components";
+import { ESet, parseDraft } from "../parser/shorthand";
+import { ParsedWorkout } from "../parser/types";
+import { useLocation } from "./A";
+import { Draft } from "./Draft";
+import { Review } from "./Review";
+import { Theme } from "./theme";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -54,24 +52,16 @@ export const App = () => {
   );
 };
 
-const parseJSONWorkout = (w: WorkoutFromJSON): ParsedWorkout => {
-  const { result, errors } = parseDraft(w.lines.join("\n"));
-  errors.forEach((err) => {
-    throw err;
-  });
-  return { ...w, sections: result };
-};
-
 const Content = () => {
-  const { data: db } = useResource(api.workouts, []);
   const { location } = useLocation();
-  const [workouts, setWorkouts] = useState([] as ParsedWorkout[]);
-  if (!db) {
-    return <>loading db</>;
-  }
+  const [sets, setSets] = useState([] as ESet[]);
 
   const generate = async () => {
-    setWorkouts(db.workouts.map((x) => parseJSONWorkout(x)));
+    const t = parseDraft(`
+-- 10 x Burning Unicorn (all with fins and time)
+50 max effort
+150 swim out, rest as needed
+`);
   };
   switch (location.pathname) {
     case "/":
@@ -81,7 +71,7 @@ const Content = () => {
           <button type="button" onClick={generate}>
             Generate
           </button>
-          <Review workouts={workouts} />
+          <Review sets={sets} />
         </>
       );
     default:

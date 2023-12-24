@@ -1,6 +1,8 @@
-import { toErr } from "../ts";
-import { ParsedEx, Section, WorkoutFromJSON } from "./types";
 import { PBuf, pbuf } from "./pbuf";
+import { ParsedEx, Section } from "./types";
+
+export type ESet = ReturnType<typeof parseSet>;
+export type Line = ReturnType<typeof parseLine>;
 
 /**
  * Parses a set, which is a sequence of lines,
@@ -29,7 +31,7 @@ export const parseSet = (text: string) => {
  * 10 x (25 cr + 25 br)
  * 2 x (4x25 cr + 4x25 br)
  */
-export const parseLine = (line: string): Section | ParsedEx => {
+export const parseLine = (line: string) => {
   const buf = pbuf(line);
   const a = buf.number();
   if (a == "") {
@@ -59,66 +61,41 @@ export const parseLine = (line: string): Section | ParsedEx => {
 
   // 10 x (25 cr + 25 br)
   // 2 x (4x25 cr + 4x25 br)
-  if (buf.peek() == "(") {
-    const s = buf.rest();
-    return {
-      name: "",
-      repeats: parseInt(a, 10),
-      ex: parseStepsLine(s.substring(1, s.length - 1)),
-    };
-  }
+  // if (buf.peek() == "(") {
+  //   const s = buf.rest();
+  //   return {
+  //     name: "",
+  //     repeats: parseInt(a, 10),
+  //     ex: parseStepsLine(s.substring(1, s.length - 1)),
+  //   };
+  // }
 
   throw new Error(`unknown line format: ${glance(line)}`);
 };
 
-export const parseDraft = (draft: string) => {
-  const result = [] as Section[];
-  const startSection = (name: string) => {
-    const m = name.match(/^(\d+)\s*x\s*(.*)$/);
-    if (m) {
-      result.push({ repeats: parseInt(m[1], 10), name: m[2], ex: [] });
+const splitIntoSets = (draft: string) => {
+  const lines = draft
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter((line) => line != "");
+  const sets = [] as string[];
+  lines.forEach((line) => {
+    if (line.startsWith("-- ")) {
+      sets[sets.length] = line;
     } else {
-      result.push({ repeats: 1, name, ex: [] });
-    }
-  };
-  const errors = [] as Error[];
-  let implicitSection = false;
-  draft.split(/\n/).forEach((line) => {
-    const t = line.trim();
-    if (t == "") {
-      return;
-    }
-    if (t.startsWith("--")) {
-      startSection(t.substring(2, t.length).trim());
-      implicitSection = false;
-      return;
-    }
-    if (t.startsWith("#")) {
-      let i = 0;
-      while (t[i] == "#") {
-        i++;
-      }
-      startSection(t.substring(i, t.length).trim());
-      implicitSection = false;
-      return;
-    }
-    try {
-      const r = parseLine(t);
-      if ("name" in r) {
-        result.push(r);
-        implicitSection = true;
+      if (sets.length == 0) {
+        sets[0] = line;
       } else {
-        if (result.length == 0 || implicitSection) {
-          startSection("");
-          implicitSection = false;
-        }
-        result[result.length - 1].ex.push(r);
+        sets[sets.length - 1] += "\n" + line;
       }
-    } catch (e) {
-      errors.push(toErr(e));
     }
   });
-  return { result, errors };
+  return sets;
+};
+
+export const parseDraft = (draft: string) => {
+  const sets = splitIntoSets(draft);
+  return { result: sets.map(parseSet), errors: [] as Error[] };
 };
 
 const glance = (x: string) => {
@@ -191,81 +168,6 @@ const parseDescription = (buf: PBuf) => {
   };
 };
 
-export const workoutVolume = (sections: Section[]) => {
-  let sum = 0;
-  for (const s of sections) {
-    let sectionSum = 0;
-    for (const ex of s.ex) {
-      sectionSum += ex.repeats * ex.amount;
-    }
-    sum += s.repeats * sectionSum;
-  }
-  return sum;
-};
-
 // const truthy = <T>(x: null | undefined | T): x is T => {
 //   return x !== null && x !== undefined;
 // };
-
-export const parseArchive = (archive: string) => {
-  const ww = [] as WorkoutFromJSON[];
-  const lines = archive.split(/\n+/).filter((line) => line !== "");
-  const r = (prefix: string) => {
-    const line = lines.shift();
-    if (!line) {
-      throw new Error(`expected ${prefix}, got end of lines`);
-    }
-    if (!line.startsWith(prefix)) {
-      throw new Error(`expected ${prefix}, got ${line}`);
-    }
-    return line.substring(prefix.length, line.length);
-  };
-  let counter = 1;
-  while (lines.length > 0) {
-    const props = {} as Record<string, string>;
-    const title = r("## ");
-    for (;;) {
-      const line = lines[0];
-      if (!line) {
-        break;
-      }
-      const m = line.match(/^(\w+): (.*?)$/);
-      if (!m) {
-        break;
-      }
-      lines.shift();
-      props[m[1]] = m[2];
-    }
-    const now = new Date();
-    const defswam = () => {
-      const m = title.match(/(\d\d\d\d-\d\d-\d\d)/);
-      return m ? m[1] : "";
-    };
-    const w = {
-      title,
-      id: props.id || now.getTime() + "-" + counter++,
-      created: props.created || now.toISOString(),
-      swam: props.swam || defswam(),
-      archived: props.archived || "",
-      lines: [] as string[],
-      comments: [] as string[],
-    };
-    while (
-      lines.length > 0 &&
-      !lines[0].startsWith("##") &&
-      !lines[0].startsWith("//")
-    ) {
-      const line = lines.shift();
-      if (!line) {
-        continue;
-      }
-      w.lines.push(line);
-    }
-    while (lines.length > 0 && lines[0].startsWith("//")) {
-      const line = lines.shift()!;
-      w.comments.push(line.substring(2, line.length).trim());
-    }
-    ww.push(w);
-  }
-  return ww;
-};
