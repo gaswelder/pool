@@ -2,6 +2,75 @@ import { toErr } from "../ts";
 import { ParsedEx, Section, WorkoutFromJSON } from "./types";
 import { PBuf, pbuf } from "./pbuf";
 
+/**
+ * Parses a set, which is a sequence of lines,
+ * with an optional first title line in the form "-- title".
+ */
+export const parseSet = (text: string) => {
+  const lines = text
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter((line) => line != "");
+  let name = "";
+  if (lines.length == 0) {
+    return { name, lines: [] };
+  }
+  if (lines[0].startsWith("-- ")) {
+    name = lines.shift()!.replace("-- ", "");
+  }
+  return { name, lines: lines.map(parseLine) };
+};
+
+/**
+ * Parses a single line, such as:
+ *
+ * 100 freestyle
+ * 10x100 freestyle
+ * 10 x (25 cr + 25 br)
+ * 2 x (4x25 cr + 4x25 br)
+ */
+export const parseLine = (line: string): Section | ParsedEx => {
+  const buf = pbuf(line);
+  const a = buf.number();
+  if (a == "") {
+    throw new Error(
+      `a number expected at "${buf.rest()}", got "${glance(line)}"`
+    );
+  }
+
+  // 100 freestyle
+  if (!buf.times()) {
+    return {
+      repeats: 1,
+      amount: parseFloat(a),
+      ...parseDescription(buf),
+    };
+  }
+
+  // 10x100 freestyle
+  const b = buf.number();
+  if (b != "") {
+    return {
+      repeats: parseFloat(a),
+      amount: parseFloat(b),
+      ...parseDescription(buf),
+    };
+  }
+
+  // 10 x (25 cr + 25 br)
+  // 2 x (4x25 cr + 4x25 br)
+  if (buf.peek() == "(") {
+    const s = buf.rest();
+    return {
+      name: "",
+      repeats: parseInt(a, 10),
+      ex: parseStepsLine(s.substring(1, s.length - 1)),
+    };
+  }
+
+  throw new Error(`unknown line format: ${glance(line)}`);
+};
+
 export const parseDraft = (draft: string) => {
   const result = [] as Section[];
   const startSection = (name: string) => {
@@ -52,48 +121,12 @@ export const parseDraft = (draft: string) => {
   return { result, errors };
 };
 
-// 10x100 freestyle
-// 10 x (25 cr + 25 br)
-// 2 x (4x25 cr + 4x25 br)
-// 100 freestyle
-const parseLine = (line: string): Section | ParsedEx => {
-  const buf = pbuf(line);
-  const a = buf.number();
-  if (a == "") {
-    throw new Error(`a number expected at "${buf.rest()}"`);
+const glance = (x: string) => {
+  const n = 10;
+  if (x.length <= n) {
+    return x;
   }
-
-  // 100 freestyle
-  if (!buf.times()) {
-    return {
-      repeats: 1,
-      amount: parseFloat(a),
-      ...parseDescription(buf),
-    };
-  }
-
-  // 10x100 freestyle
-  const b = buf.number();
-  if (b != "") {
-    return {
-      repeats: parseFloat(a),
-      amount: parseFloat(b),
-      ...parseDescription(buf),
-    };
-  }
-
-  // 10 x (25 cr + 25 br)
-  // 2 x (4x25 cr + 4x25 br)
-  if (buf.peek() == "(") {
-    const s = buf.rest();
-    return {
-      name: "",
-      repeats: parseInt(a, 10),
-      ex: parseStepsLine(s.substring(1, s.length - 1)),
-    };
-  }
-
-  throw new Error(`unknown format: ${line}`);
+  return x.substring(0, n) + "...";
 };
 
 const parseStepsLine = (s: string) => {

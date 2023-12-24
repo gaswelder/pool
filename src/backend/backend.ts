@@ -1,5 +1,4 @@
 import express from "express";
-import * as fs from "fs";
 import * as t from "runtypes";
 import { parseArchive } from "../parser/shorthand";
 import { toErr } from "../ts";
