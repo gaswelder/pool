@@ -73,7 +73,7 @@ const Content = () => {
             type="button"
             onClick={() => {
               const r = sst();
-              setSets(r[0].sets);
+              setSets(r[Math.round(Math.random() * (r.length - 1))].sets);
               setVer((x) => x + 1);
             }}
           >
