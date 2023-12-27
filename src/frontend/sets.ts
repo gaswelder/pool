@@ -1,3 +1,4 @@
+import { Line } from "../parser/shorthand";
 import { parseSet } from "./draft";
 
 let iota = 1;
@@ -142,7 +143,7 @@ export const sst = () => {
   return [
     `# Day 1\n`,
     [
-      random("Warmup", 200, sel(Wup)),
+      random("Warmup", 200, sel(Wup), 0.5),
       random("Extended Technique", 800, sel(Tech)),
       random("Sprint", 200, sel(Spr)),
       random("Rest", 200, sel(Rest)),
@@ -150,14 +151,14 @@ export const sst = () => {
 
     `\n# Day 2\n`,
     [
-      random("Warmup", 200, sel(Wup)),
+      random("Warmup", 200, sel(Wup), 0.5),
       random("Technique", 400, sel(Tech)),
       random("Endurance", 1200, sel(End)),
     ].join("\n"),
 
     `\n# Day 3\n`,
     [
-      random("Warmup", 200, sel(Wup)),
+      random("Warmup", 200, sel(Wup), 0.5),
       random("Technique", 400, sel(Tech)),
       random("Fast Swim", 1000, sel(Fast)),
       random("Rest", 200, sel(Rest)),
@@ -168,21 +169,37 @@ export const sst = () => {
   ].join("\n");
 };
 
-const random = (title: string, m: number, sets: { s: string }[]) => {
+const random = (
+  title: string,
+  amount: number,
+  sets: { s: string }[],
+  scale?: number
+) => {
   let total = 0;
   let r = "-- " + title;
   if (sets.length == 0) {
     return r;
   }
   let sanity = 10;
-  while (total < m && sanity-- > 0) {
+  while (total < amount && sanity-- > 0) {
     const x = sets[Math.round(Math.random() * (sets.length - 1))];
     const s = parseSet(x.s);
+    if (scale) {
+      s.forEach((line) => (line.amount *= scale));
+    }
     const len = s.map((line) => line.amount * line.repeats).reduce(sum);
     total += len;
-    r += "\n" + x.s;
+    r += "\n" + formatSet(s);
   }
   return r;
 };
+const formatSet = (lines: Line[]) =>
+  lines.map(
+    (line) =>
+      `${line.repeats}x${line.amount} ${line.desc} ${line.tags
+        .map((t) => "#" + t)
+        .join(" ")}`
+  );
+
 const sum = (a: number, b: number) => a + b;
 const sel = (k: number) => sets.filter((x) => x.k.includes(k));
