@@ -1,32 +1,10 @@
-export type ESet = ReturnType<typeof parseSet>;
 export type Line = ReturnType<typeof parseLine>;
-
-/**
- * Parses a set, which is a sequence of lines,
- * with an optional first title line in the form "-- title".
- */
-export const parseSet = (text: string) => {
-  const lines = text
-    .split(/\n/)
-    .map((line) => line.trim())
-    .filter((line) => line != "");
-  let name = "";
-  if (lines.length == 0) {
-    return { name, lines: [] };
-  }
-  if (lines[0].startsWith("-- ")) {
-    name = lines.shift()!.replace("-- ", "");
-  }
-  return { name, lines: lines.map(parseLine) };
-};
 
 /**
  * Parses a single line, such as:
  *
  * 100 freestyle
  * 10x100 freestyle
- * 10 x (25 cr + 25 br)
- * 2 x (4x25 cr + 4x25 br)
  */
 export const parseLine = (line: string) => {
   const buf = pbuf(line);

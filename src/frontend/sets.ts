@@ -1,4 +1,4 @@
-import { parseSet } from "../parser/shorthand";
+import { parseSet } from "./draft";
 
 let iota = 1;
 const Wup = iota++;
@@ -140,17 +140,32 @@ const sets = [
 // smim-smooth template (4 days)
 export const sst = () => {
   return [
-    {
-      name: "day 1",
-      sets: [warmup(), technique(2), sprint(), rest()].join("\n"),
-    },
-    { name: "day 2", sets: [warmup(), technique(1), endurance()].join("\n") },
-    {
-      name: "day 3",
-      sets: [warmup(), technique(1), fastSwim(), rest()].join("\n"),
-    },
-    { name: "day 4", sets: [steadySwim()].join("\n") },
-  ];
+    `# Day 1\n`,
+    [
+      random("Warmup", 200, sel(Wup)),
+      random("Extended Technique", 800, sel(Tech)),
+      random("Sprint", 200, sel(Spr)),
+      random("Rest", 200, sel(Rest)),
+    ].join("\n"),
+
+    `\n# Day 2\n`,
+    [
+      random("Warmup", 200, sel(Wup)),
+      random("Technique", 400, sel(Tech)),
+      random("Endurance", 1200, sel(End)),
+    ].join("\n"),
+
+    `\n# Day 3\n`,
+    [
+      random("Warmup", 200, sel(Wup)),
+      random("Technique", 400, sel(Tech)),
+      random("Fast Swim", 1000, sel(Fast)),
+      random("Rest", 200, sel(Rest)),
+    ].join("\n"),
+
+    `\n# Day 4\n`,
+    [random("Steady Swim", 1200, sel(Steady))].join("\n"),
+  ].join("\n");
 };
 
 const random = (title: string, m: number, sets: { s: string }[]) => {
@@ -163,7 +178,7 @@ const random = (title: string, m: number, sets: { s: string }[]) => {
   while (total < m && sanity-- > 0) {
     const x = sets[Math.round(Math.random() * (sets.length - 1))];
     const s = parseSet(x.s);
-    const len = s.lines.map((line) => line.amount * line.repeats).reduce(sum);
+    const len = s.map((line) => line.amount * line.repeats).reduce(sum);
     total += len;
     r += "\n" + x.s;
   }
@@ -171,20 +186,3 @@ const random = (title: string, m: number, sets: { s: string }[]) => {
 };
 const sum = (a: number, b: number) => a + b;
 const sel = (k: number) => sets.filter((x) => x.k.includes(k));
-const range = (x: number) =>
-  Array(x)
-    .fill(0)
-    .map((_, i) => i);
-
-const warmup = () => random("warmup", 200, sel(Wup)); // random 200 from warmups
-const technique = (multiplier: number) => {
-  const techniques = sel(Tech);
-  return range(multiplier)
-    .flatMap((i) => random("technique", 400, techniques))
-    .join("\n");
-};
-const sprint = () => random("sprint", 200, sel(Spr));
-const rest = () => random("rest", 200, sel(Rest));
-const endurance = () => random("endurance", 1200, sel(End));
-const fastSwim = () => random("fast swim", 1000, sel(Fast));
-const steadySwim = () => random("steady swim", 1200, sel(Steady));

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { ESet } from "../parser/shorthand";
 import { useLocation } from "./A";
 import { Draft } from "./Draft";
-import { Review } from "./Review";
 import { Theme } from "./theme";
 import { parseDraft } from "./draft";
 import { sst } from "./sets";
@@ -53,33 +51,27 @@ export const App = () => {
   );
 };
 
+const defaultText = sst();
 const Content = () => {
   const { location } = useLocation();
-  const [sets, setSets] = useState(`-- warmup
-  4 x 100 easy flutter kick
-  4 x 100 easy freestyle
-  -- 4 x main
-  100 underwater pull
-  400 butterfly
-  `);
+  const [text, setText] = useState(defaultText);
   const [ver, setVer] = useState(0);
 
   switch (location.pathname) {
     case "/":
       return (
         <>
-          <Draft key={ver} initialText={sets} />
+          <h3>Draft</h3>
           <button
             type="button"
             onClick={() => {
-              const r = sst();
-              setSets(r[Math.round(Math.random() * (r.length - 1))].sets);
+              setText(sst());
               setVer((x) => x + 1);
             }}
           >
             Generate
           </button>
-          <Review sets={parseDraft(sets).result} />
+          <Draft key={ver} initialText={text} />
         </>
       );
     default:
