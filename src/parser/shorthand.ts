@@ -57,8 +57,8 @@ const glance = (x: string) => {
 };
 
 const parseDescription = (buf: PBuf) => {
-  const eqs = [] as string[];
-  const noneqs = [] as string[];
+  const tags = [] as string[];
+  const words = [] as string[];
   while (buf.peek() !== null) {
     if (buf.peek() == "+") {
       break;
@@ -66,14 +66,14 @@ const parseDescription = (buf: PBuf) => {
     const part = buf.word();
     buf.spaces();
     if (part[0] == "#") {
-      eqs.push(part.substring(1, part.length));
+      tags.push(part.substring(1, part.length));
     } else {
-      noneqs.push(part);
+      words.push(part);
     }
   }
   return {
-    desc: noneqs.join(" ").trim(),
-    equipment: eqs,
+    desc: words.join(" ").trim(),
+    tags,
   };
 };
 

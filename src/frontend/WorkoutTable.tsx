@@ -41,6 +41,16 @@ const Table = styled.table`
   }
 `;
 
+const Tag = styled.span`
+  display: inline-block;
+  padding: 1px 8px;
+  margin: 0;
+  font-size: 80%;
+  color: ${(props) => props.color};
+  border: 1px solid ${(props) => props.color};
+  border-radius: ${Theme.borderRadius};
+`;
+
 export const WorkoutTable = ({ workout }: { workout: SetProg[] }) => {
   return (
     <>
@@ -57,7 +67,12 @@ export const WorkoutTable = ({ workout }: { workout: SetProg[] }) => {
                     <td>
                       <Rep line={line} />
                     </td>
-                    <td>{line.desc}</td>
+                    <td>
+                      {line.desc}{" "}
+                      {line.tags.map((tag) => (
+                        <Tag key={tag}>{tag}</Tag>
+                      ))}
+                    </td>
                   </tr>
                 ))}
               </Fragment>
@@ -94,16 +109,6 @@ const RepeatsContainer = styled.div`
     height: 100%;
     opacity: 0.5;
   }
-`;
-
-const Tag = styled.span`
-  display: inline-block;
-  padding: 2px 8px;
-  margin: 0 2px;
-  font-size: 90%;
-  color: ${(props) => props.color};
-  border: 1px solid ${(props) => props.color};
-  border-radius: ${Theme.borderRadius};
 `;
 
 const Equipment = ({ id }: { id: string }) => {
