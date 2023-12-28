@@ -1,15 +1,53 @@
+import * as fs from "fs";
 import { Line, parseLine } from "../parser/shorthand";
+import { truthy } from "../ts";
 
-let iota = 1;
-const Wup = iota++;
-const Tech = iota++;
-const Spr = iota++;
-const End = iota++;
-const Fast = iota++;
-const Steady = iota++;
-const Rest = iota++;
+const superset = () => {
+  const text = fs
+    .readFileSync("/home/gas/code/priv/notes/plan-superset.md")
+    .toString();
+  const lines = text
+    .split("\n")
+    .map((line, i) => {
+      const classes = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
+      classes.forEach((s) => {
+        line = line.replace(`[${s}]`, "");
+      });
+      try {
+        const p = parseLine(line);
+        return { i, line: p, classes };
+      } catch (err) {
+        return null;
+      }
+    })
+    .filter(truthy);
+  return lines;
+};
 
-const sets = [
+const formatSet = (lines: Line[]) =>
+  lines.map(
+    (line) =>
+      `${line.repeats}x${line.amount} ${line.desc} ${line.tags
+        .map((t) => "#" + t)
+        .join(" ")}`
+  );
+
+const Wup = "warmup";
+const Tech = "tech";
+const Spr = "sprint";
+const End = "endurance";
+const Fast = "fastswim";
+const Steady = "steadyswim";
+const Rest = "rest";
+
+const sets = superset().map((line) => {
+  return {
+    s: formatSet([line.line]) + ` (${line.i})`,
+    k: line.classes,
+  };
+});
+
+const sets0 = [
   { s: `100 cr #time`, k: [Rest, Fast] },
   // 200 back
   { s: `200 back #time`, k: [Rest] },
@@ -184,7 +222,13 @@ const random = (
     const x = sets[Math.round(Math.random() * (sets.length - 1))];
     const s = parseSet(x.s);
     if (scale) {
-      s.forEach((line) => (line.amount *= scale));
+      s.forEach((line) => {
+        if (line.repeats > 1) {
+          line.repeats *= scale;
+        } else {
+          line.amount *= scale;
+        }
+      });
     }
     const len = s.map((line) => line.amount * line.repeats).reduce(sum);
     total += len;
@@ -201,13 +245,5 @@ const parseSet = (text: string) => {
   return lines.map(parseLine);
 };
 
-const formatSet = (lines: Line[]) =>
-  lines.map(
-    (line) =>
-      `${line.repeats}x${line.amount} ${line.desc} ${line.tags
-        .map((t) => "#" + t)
-        .join(" ")}`
-  );
-
 const sum = (a: number, b: number) => a + b;
-const sel = (k: number) => sets.filter((x) => x.k.includes(k));
+const sel = (k: string) => sets.filter((x) => x.k.includes(k));

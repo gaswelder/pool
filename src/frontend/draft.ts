@@ -1,4 +1,5 @@
 import { parseLine } from "../parser/shorthand";
+import { truthy } from "../ts";
 
 export type WeekProg = ReturnType<typeof parseDraft>;
 export type DayProg = WeekProg["days"][0];
@@ -54,8 +55,4 @@ const split = (lines: string[], prefix: string) => {
     }
   });
   return sets;
-};
-
-const truthy = <T>(x: T | null): x is T => {
-  return x !== null;
 };
