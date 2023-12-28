@@ -37,18 +37,6 @@ export const parseDraft = (draft: string) => {
   };
 };
 
-/**
- * Parses a set, which is a sequence of lines,
- * with an optional first title line in the form "-- title".
- */
-export const parseSet = (text: string) => {
-  const lines = text
-    .split(/\n/)
-    .map((line) => line.trim())
-    .filter((line) => line != "");
-  return lines.map(parseLine);
-};
-
 const split = (lines: string[], prefix: string) => {
   const sets = [] as { name: string; lines: string[] }[];
   lines.forEach((line) => {

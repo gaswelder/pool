@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useLocation } from "./A";
 import { Draft } from "./Draft";
 import { Theme } from "./theme";
-import { parseDraft } from "./draft";
-import { sst } from "./sets";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -51,24 +49,48 @@ export const App = () => {
   );
 };
 
-const defaultText = sst();
+const call = async (method: string, params?: unknown) => {
+  const response = await fetch("http://localhost:2346/rpc", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ jsonrpc: "2.0", method, params }),
+  });
+  const body = await response.json();
+  if (body.error) {
+    throw new Error(body.error.message);
+  }
+  return body.data;
+};
+
+const gen = async () => {
+  return call("generate", {});
+};
+
 const Content = () => {
   const { location } = useLocation();
-  const [text, setText] = useState(defaultText);
+  const [text, setText] = useState("");
   const [ver, setVer] = useState(0);
+  const [initialized, setInitialized] = useState(false);
+  const init = async () => {
+    try {
+      setText(await gen());
+      setVer((x) => x + 1);
+    } finally {
+      setInitialized(true);
+    }
+  };
+  useEffect(() => {
+    init().catch(console.error);
+  }, []);
 
   switch (location.pathname) {
     case "/":
       return (
         <>
           <h3>Draft</h3>
-          <button
-            type="button"
-            onClick={() => {
-              setText(sst());
-              setVer((x) => x + 1);
-            }}
-          >
+          <button type="button" disabled={!initialized} onClick={init}>
             Generate
           </button>
           <Draft key={ver} initialText={text} />

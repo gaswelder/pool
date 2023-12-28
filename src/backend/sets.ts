@@ -1,5 +1,4 @@
-import { Line } from "../parser/shorthand";
-import { parseSet } from "./draft";
+import { Line, parseLine } from "../parser/shorthand";
 
 let iota = 1;
 const Wup = iota++;
@@ -193,6 +192,15 @@ const random = (
   }
   return r;
 };
+
+const parseSet = (text: string) => {
+  const lines = text
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter((line) => line != "");
+  return lines.map(parseLine);
+};
+
 const formatSet = (lines: Line[]) =>
   lines.map(
     (line) =>

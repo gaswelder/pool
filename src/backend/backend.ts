@@ -1,6 +1,7 @@
 import express from "express";
 import * as t from "runtypes";
 import { toErr } from "../ts";
+import { sst } from "./sets";
 
 express()
   .use(express.static("build"))
@@ -25,7 +26,11 @@ express()
   })
   .listen(2346);
 
-const methods = {} as Record<string, (params: unknown) => Promise<unknown>>;
+const methods = {
+  async generate() {
+    return sst();
+  },
+} as Record<string, (params: unknown) => Promise<unknown>>;
 
 const dispatch = async (body: unknown) => {
   const ok = (data: unknown) => ({ jsonrpc: "2.0", data });
