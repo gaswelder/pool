@@ -48,15 +48,18 @@ const Fast = "fastswim";
 const Steady = "steadyswim";
 const Rest = "rest";
 
-const sets = superset().map((entry) => {
-  return {
-    s: entry.line,
-    k: entry.tags,
-  };
-});
+const sets = () =>
+  superset().map((entry) => {
+    return {
+      s: entry.line,
+      k: entry.tags,
+    };
+  });
 
 // smim-smooth template (4 days)
 export const sst = () => {
+  const sss = sets();
+  const sel = (k: string) => sss.filter((x) => x.k.includes(k));
   return [
     `# Day 1\n`,
     [
@@ -126,4 +129,3 @@ const parseSet = (text: string) => {
 };
 
 const sum = (a: number, b: number) => a + b;
-const sel = (k: string) => sets.filter((x) => x.k.includes(k));
