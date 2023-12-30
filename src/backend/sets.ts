@@ -6,22 +6,27 @@ const superset = () => {
   const text = fs
     .readFileSync("/home/gas/code/priv/notes/plan-superset.md")
     .toString();
-  const lines = text
-    .split("\n")
-    .map((line, i) => {
-      const classes = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
-      classes.forEach((s) => {
-        line = line.replace(`[${s}]`, "");
-      });
-      try {
-        const p = parseLine(line);
-        return { i, line: p, classes };
-      } catch (err) {
-        return null;
-      }
-    })
-    .filter(truthy);
-  return lines;
+  const entries = [] as { tags: string[]; line: string }[];
+  const lines = text.split("\n").map((s) => s.trim());
+
+  for (;;) {
+    let line = lines.shift();
+    if (line === undefined) break;
+    try {
+      const p = parseLine(line);
+    } catch (err) {
+      continue;
+    }
+    while (lines.length > 0 && lines[0] != "" && !lines[0].startsWith("[x]")) {
+      line += " " + lines.shift();
+    }
+    const tags = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
+    for (const tag of tags) {
+      line = line.replace(`[${tag}]`, "");
+    }
+    entries.push({ line, tags });
+  }
+  return entries;
 };
 
 const formatSet = (lines: Line[]) =>
@@ -40,10 +45,10 @@ const Fast = "fastswim";
 const Steady = "steadyswim";
 const Rest = "rest";
 
-const sets = superset().map((line) => {
+const sets = superset().map((entry) => {
   return {
-    s: formatSet([line.line]) + ` (${line.i})`,
-    k: line.classes,
+    s: entry.line,
+    k: entry.tags,
   };
 });
 
