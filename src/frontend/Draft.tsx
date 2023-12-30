@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Collapsible } from "./Collapsible";
 import { WorkoutTable } from "./WorkoutTable";
 import { parseDraft } from "./draft";
+import { Theme } from "./theme";
 
 const DraftTextarea = styled.textarea`
   width: 60em;
@@ -12,9 +13,8 @@ const DraftTextarea = styled.textarea`
 
 const WorkoutContainer = styled.div`
   background-color: white;
-  padding: 1em;
-  margin-left: 0.5em;
-  border-radius: 4px;
+  padding: ${Theme.h} ${Theme.w};
+  border-radius: ${Theme.borderRadius};
   display: flex;
   flex-wrap: wrap;
   & section {
@@ -30,6 +30,19 @@ const WorkoutContainer = styled.div`
     right: -20px;
     top: 80px;
     bottom: 0;
+  }
+  @media print {
+    & section {
+      position: static;
+      ::after {
+        display: none;
+      }
+      flex-grow: 1;
+      width: 40%;
+      margin: 6px;
+      padding: 6px;
+      border: 1px solid black;
+    }
   }
 `;
 

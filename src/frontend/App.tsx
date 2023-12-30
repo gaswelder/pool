@@ -39,6 +39,16 @@ const AppDiv = styled.div`
     border-color: #2618ce;
     background-color: #bbdeeb;
   }
+  @media print {
+    & details,
+    & button {
+      display: none;
+    }
+    & {
+      padding: 0;
+      margin: 0;
+    }
+  }
 `;
 
 export const App = () => {
@@ -89,7 +99,6 @@ const Content = () => {
     case "/":
       return (
         <>
-          <h3>Draft</h3>
           <button type="button" disabled={!initialized} onClick={init}>
             Generate
           </button>
