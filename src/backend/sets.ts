@@ -17,7 +17,11 @@ const superset = () => {
     } catch (err) {
       continue;
     }
+    let nl = 1;
     while (lines.length > 0 && lines[0] != "" && !lines[0].startsWith("[x]")) {
+      if (nl++ == 1) {
+        line += " // ";
+      }
       line += " " + lines.shift();
     }
     const tags = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);

@@ -68,7 +68,7 @@ export const WorkoutTable = ({ workout }: { workout: SetProg[] }) => {
                       <Rep line={line} />
                     </td>
                     <td>
-                      {line.desc}{" "}
+                      <Desc text={line.desc} />{" "}
                       {line.tags.map((tag) => (
                         <Tag key={tag}>{tag}</Tag>
                       ))}
@@ -94,6 +94,27 @@ const Rep = ({ line }: { line: Line }) => {
     );
   }
   return <>{line.amount}</>;
+};
+
+const Desc = ({ text }: { text: string }) => {
+  const [title, ...comments] = text.split("//");
+  return (
+    <>
+      {title}
+      {comments.length > 0 && (
+        <div
+          style={{
+            color: "#333",
+            fontSize: "90%",
+            fontStyle: "italic",
+            marginTop: "6px",
+          }}
+        >
+          {comments.join(" ")}
+        </div>
+      )}
+    </>
+  );
 };
 
 const RepeatsContainer = styled.div`
