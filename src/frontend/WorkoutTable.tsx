@@ -3,7 +3,6 @@ import { Line } from "../parser/shorthand";
 import { Theme } from "./theme";
 import { Fragment } from "react";
 import { SetProg } from "./draft";
-// import bracket from "./Left_square_bracket.svg";
 
 const sum = (a: number, b: number) => a + b;
 const lineVolume = (line: Line) => line.repeats * line.amount;
@@ -111,34 +110,4 @@ const Desc = ({ text }: { text: string }) => {
       )}
     </>
   );
-};
-
-const RepeatsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 35px;
-  > div {
-    background-size: 100% 100%;
-    width: 10px;
-    height: 100%;
-    opacity: 0.5;
-  }
-`;
-
-const Equipment = ({ id }: { id: string }) => {
-  const colors: Record<string, string> = {
-    buoy: "green",
-    "ankle-buoy": "green",
-    shortpaddles: "orange",
-    "small-paddles": "orange",
-    paddles: "gray",
-    bigpaddles: "red",
-    kickboard: "blue",
-    brakes: "greed",
-    fins: "orange",
-  };
-  return <Tag color={colors[id]}>{id}</Tag>;
 };
