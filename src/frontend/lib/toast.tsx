@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import styled from "styled-components";
-import { Theme } from "./theme";
+import { Theme } from "../theme";
 
 const duration = 2000;
 

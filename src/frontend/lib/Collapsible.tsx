@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import styled from "styled-components";
-import { Theme } from "./theme";
+import { Theme } from "../theme";
 
 const Summary = styled.summary`
   padding: ${Theme.h} ${Theme.w};

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { Collapsible } from "./Collapsible";
+import { Collapsible } from "./lib/Collapsible";
 import { WorkoutTable } from "./WorkoutTable";
 import { parseDraft } from "./draft";
 import { Theme } from "./theme";
