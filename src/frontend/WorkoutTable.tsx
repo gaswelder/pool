@@ -40,7 +40,7 @@ const Table = styled.table`
   }
   & + b {
     display: block;
-    border-top: 1px solid #666;
+    border-top: 1px solid #aac;
     margin-top: ${Theme.h};
     padding-top: ${Theme.h};
   }
