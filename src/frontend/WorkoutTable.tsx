@@ -23,7 +23,7 @@ const Table = styled.table`
     font-size: 80%;
     text-align: left;
     padding-top: 16px;
-    border-bottom: thin solid #d1dfec;
+    border-bottom: thin solid ${Theme.thLineColor};
   }
   td:nth-child(1) {
     white-space: nowrap;
@@ -37,6 +37,12 @@ const Table = styled.table`
   .section-name th {
     font-weight: normal;
     font-style: italic;
+  }
+  & + b {
+    display: block;
+    border-top: 1px solid #666;
+    margin-top: ${Theme.h};
+    padding-top: ${Theme.h};
   }
 `;
 

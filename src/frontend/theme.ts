@@ -4,4 +4,5 @@ export const Theme = {
   w: "16px",
   fontSize: "14px",
   duration: "0.2s",
+  thLineColor: "#d1dfec",
 };
