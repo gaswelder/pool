@@ -12,24 +12,18 @@ const DraftTextarea = styled.textarea`
 `;
 
 const WorkoutContainer = styled.div`
-  background-color: white;
-  padding: ${Theme.h} ${Theme.w};
+  background-color: transparent;
   border-radius: ${Theme.borderRadius};
   display: flex;
   flex-wrap: wrap;
   & section {
-    max-width: 20em;
+    background: white;
+    width: 320px;
     position: relative;
-    margin-right: 40px;
-  }
-  & section::after {
-    display: block;
-    content: "";
-    border-right: 1px solid #ccc;
-    position: absolute;
-    right: -20px;
-    top: 80px;
-    bottom: 0;
+    border-radius: ${Theme.borderRadius};
+    padding: ${Theme.h} ${Theme.w};
+    margin-right: 6px;
+    margin-top: 6px;
   }
   @media print {
     & section {

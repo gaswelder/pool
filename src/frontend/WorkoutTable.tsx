@@ -42,13 +42,9 @@ const Table = styled.table`
 `;
 
 const Tag = styled.span`
-  display: inline-block;
-  padding: 1px 8px;
   margin: 0;
-  font-size: 80%;
   color: ${(props) => props.color};
-  border: 1px solid ${(props) => props.color};
-  border-radius: ${Theme.borderRadius};
+  text-decoration: underline;
 `;
 
 export const WorkoutTable = ({ workout }: { workout: SetProg[] }) => {
