@@ -10,12 +10,17 @@ export const parseDraft = (draft: string) => {
     .split(/\n/)
     .map((line) => line.trim())
     .filter((line) => line != "");
-  const days = split(lines, "#");
+  const days = splitSections(lines, "#");
   const errors = [] as Error[];
   return {
     errors,
     days: days.map((day) => {
-      const sets = split(day.lines, "--");
+      // Drop introduction comments from the beginning.
+      const dayLines = [...day.lines];
+      while (dayLines.length > 0 && dayLines[0].startsWith("//")) {
+        dayLines.shift();
+      }
+      const sets = splitSections(dayLines, "--");
       return {
         name: day.name,
         sets: sets.map((set) => {
@@ -38,12 +43,12 @@ export const parseDraft = (draft: string) => {
   };
 };
 
-const split = (lines: string[], prefix: string) => {
+const splitSections = (lines: string[], startPrefix: string) => {
   const sets = [] as { name: string; lines: string[] }[];
   lines.forEach((line) => {
-    if (line.startsWith(prefix)) {
+    if (line.startsWith(startPrefix)) {
       sets[sets.length] = {
-        name: line.substring(prefix.length, line.length).trim(),
+        name: line.substring(startPrefix.length, line.length).trim(),
         lines: [],
       };
     } else {
