@@ -1,33 +1,64 @@
 import * as fs from "fs";
 import { Line, parseLine } from "../parser/shorthand";
 
+type Item = ReturnType<typeof superset>[0];
+
 const superset = () => {
   const text = fs
     .readFileSync("/home/gas/code/priv/notes/plan-superset.md")
     .toString();
-  const entries = [] as { tags: string[]; line: string }[];
   const lines = text.split("\n").map((s) => s.trim());
 
-  for (;;) {
-    let line = lines.shift();
-    if (line === undefined) break;
-    try {
-      const p = parseLine(line);
-    } catch (err) {
-      continue;
-    }
-    let nl = 1;
-    while (lines.length > 0 && lines[0] != "" && !lines[0].startsWith("[x]")) {
-      if (nl++ == 1) {
-        line += " // ";
+  // Scans to the next parsable line.
+  const nextEx = () => {
+    for (;;) {
+      let line = lines.shift();
+      if (line === undefined) {
+        return null;
       }
-      line += " " + lines.shift();
+      try {
+        const p = parseLine(line);
+        return { line, parsed: p };
+      } catch (err) {
+        continue;
+      }
     }
+  };
+
+  const comments = () => {
+    const cc = [] as string[];
+    while (lines.length > 0 && lines[0] != "" && !lines[0].startsWith("[x]")) {
+      cc.push(lines.shift()!);
+    }
+    return cc;
+  };
+
+  const nextOne = () => {
+    const ex = nextEx();
+    if (!ex) return null;
+
+    let line = ex.line;
+
+    // Extract tags from the line
     const tags = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
     for (const tag of tags) {
       line = line.replace(`[${tag}]`, "");
     }
-    entries.push({ line, tags });
+
+    // Read comments if they follow
+    const cc = comments();
+    if (cc.length > 0) {
+      line += " // " + cc.join(" ");
+    }
+    return { line, tags, parsed: ex.parsed };
+  };
+
+  type T = NonNullable<ReturnType<typeof nextOne>>;
+  const entries = [] as T[];
+  for (;;) {
+    const ex = nextOne();
+    if (!ex) break;
+    entries.push(ex);
   }
   return entries;
 };
@@ -48,23 +79,26 @@ const Fast = "fastswim";
 const Steady = "steadyswim";
 const Rest = "rest";
 
-const sets = () =>
-  superset().map((entry) => {
-    return {
-      s: entry.line,
-      k: entry.tags,
-    };
-  });
+const kind = (line: string) => line.split(" ")[0];
 
-// smim-smooth template (4 days)
 export const sst = () => {
-  const sss = sets();
-  const sel = (k: string) => sss.filter((x) => x.k.includes(k));
+  const sss = superset();
+  const sel = (tag: string) => sss.filter((item) => item.tags.includes(tag));
+  const techset = (m: number) => {
+    const items = sel(Tech);
+    const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
+    const type = types[Math.round(Math.random() * (types.length - 1))];
+    return random(
+      "Technique",
+      m,
+      items.filter((x) => kind(x.parsed.desc) == type)
+    );
+  };
   return [
     `# Day 1\n`,
     [
       random("Warmup", 200, sel(Wup), 0.5),
-      random("Extended Technique", 800, sel(Tech)),
+      techset(800),
       random("Sprint", 200, sel(Spr)),
       random("Rest", 200, sel(Rest)),
     ].join("\n"),
@@ -72,14 +106,14 @@ export const sst = () => {
     `\n# Day 2\n`,
     [
       random("Warmup", 200, sel(Wup), 0.5),
-      random("Technique", 400, sel(Tech)),
+      techset(400),
       random("Endurance", 1200, sel(End)),
     ].join("\n"),
 
     `\n# Day 3\n`,
     [
       random("Warmup", 200, sel(Wup), 0.5),
-      random("Technique", 400, sel(Tech)),
+      techset(400),
       random("Fast Swim", 1000, sel(Fast)),
       random("Rest", 200, sel(Rest)),
     ].join("\n"),
@@ -92,7 +126,7 @@ export const sst = () => {
 const random = (
   title: string,
   amount: number,
-  sets: { s: string }[],
+  sets: Item[],
   scale?: number
 ) => {
   let total = 0;
@@ -103,7 +137,7 @@ const random = (
   let sanity = 10;
   while (total < amount && sanity-- > 0) {
     const x = sets[Math.round(Math.random() * (sets.length - 1))];
-    const s = parseSet(x.s);
+    const s = parseSet(x.line);
     if (scale) {
       s.forEach((line) => {
         if (line.repeats > 1) {
