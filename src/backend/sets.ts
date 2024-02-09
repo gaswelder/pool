@@ -1,67 +1,5 @@
-import * as fs from "fs";
 import { Line, parseLine } from "../parser/shorthand";
-
-type Item = ReturnType<typeof superset>[0];
-
-const superset = () => {
-  const text = fs
-    .readFileSync("/home/gas/code/priv/notes/plan-superset.md")
-    .toString();
-  const lines = text.split("\n").map((s) => s.trim());
-
-  // Scans to the next parsable line.
-  const nextEx = () => {
-    for (;;) {
-      let line = lines.shift();
-      if (line === undefined) {
-        return null;
-      }
-      try {
-        const p = parseLine(line);
-        return { line, parsed: p };
-      } catch (err) {
-        continue;
-      }
-    }
-  };
-
-  const comments = () => {
-    const cc = [] as string[];
-    while (lines.length > 0 && lines[0] != "" && !lines[0].startsWith("[x]")) {
-      cc.push(lines.shift()!);
-    }
-    return cc;
-  };
-
-  const nextOne = () => {
-    const ex = nextEx();
-    if (!ex) return null;
-
-    let line = ex.line;
-
-    // Extract tags from the line
-    const tags = [...line.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
-    for (const tag of tags) {
-      line = line.replace(`[${tag}]`, "");
-    }
-
-    // Read comments if they follow
-    const cc = comments();
-    if (cc.length > 0) {
-      line += " // " + cc.join(" ");
-    }
-    return { line, tags, parsed: ex.parsed };
-  };
-
-  type T = NonNullable<ReturnType<typeof nextOne>>;
-  const entries = [] as T[];
-  for (;;) {
-    const ex = nextOne();
-    if (!ex) break;
-    entries.push(ex);
-  }
-  return entries;
-};
+import { Item, parseSuperset } from "./superset";
 
 const formatSet = (lines: Line[]) =>
   lines.map(
@@ -82,8 +20,12 @@ const Rest = "rest";
 const kind = (line: string) => line.split(" ")[0];
 
 export const sst = () => {
-  const sss = superset();
-  const sel = (tag: string) => sss.filter((item) => item.tags.includes(tag));
+  const entries = parseSuperset();
+  entries.forEach((e) => {
+    e.parsed.desc += " // " + e.comments.join(" ");
+  });
+  const sel = (tag: string) =>
+    entries.filter((item) => item.tags.includes(tag));
   const techset = (m: number) => {
     const items = sel(Tech);
     const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
