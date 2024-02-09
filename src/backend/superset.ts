@@ -21,11 +21,11 @@ export const parseSuperset = () => {
       try {
         const p = parseLine(line);
         // Extract tags from the line
-        const tags = [...p.desc.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
-        for (const tag of tags) {
-          p.desc = p.desc.replace(`[${tag}]`, "");
+        const categories = [...p.desc.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
+        for (const x of categories) {
+          p.desc = p.desc.replace(`[${x}]`, "");
         }
-        return { line, parsed: p, tags };
+        return { line, parsed: p, categories };
       } catch (err) {
         continue;
       }
@@ -48,7 +48,7 @@ export const parseSuperset = () => {
     return {
       comments,
       history,
-      tags: ex.tags,
+      categories: ex.categories,
       parsed: ex.parsed,
       line: ex.line,
     };

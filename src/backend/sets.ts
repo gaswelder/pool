@@ -1,7 +1,6 @@
-import { Line, parseLine } from "../parser/shorthand";
 import { Item, parseSuperset } from "./superset";
 
-const Tags = {
+const Categories = {
   Wup: "warmup",
   Tech: "tech",
   Spr: "sprint",
@@ -11,103 +10,128 @@ const Tags = {
   Rest: "rest",
 };
 
-const formatSet = (lines: Line[]) =>
-  lines.map(
-    (line) =>
-      `${line.repeats}x${line.amount} ${line.desc} ${line.tags
-        .map((t) => "#" + t)
-        .join(" ")}`
-  );
+export const sst = () => {
+  const entries = parseSuperset();
+
+  const byCategory = new Map([["", [] as Item[]]]);
+  const sel = (tag: string) => byCategory.get(tag) || [];
+
+  entries.forEach((e) => {
+    const unknownCats = e.categories.filter(
+      (x) => !Object.values(Categories).includes(x)
+    );
+    if (unknownCats.length > 0) {
+      console.warn("unknown tags: " + unknownCats);
+    }
+
+    byCategory.get("")!.push(e);
+    e.categories.forEach((cat) => {
+      const list = byCategory.get(cat);
+      if (list) list.push(e);
+      else byCategory.set(cat, [e]);
+    });
+  });
+
+  const warmup = () => ["-- Warmup", ...random(200, sel(Categories.Wup), 0.5)];
+  const sprint = () => ["-- Sprint", ...random(200, sel(Categories.Spr))];
+  const rest = () => ["-- Rest", ...random(200, sel(Categories.Rest))];
+  const endurance = () => [
+    "-- Endurance",
+    ...random(1200, sel(Categories.End)),
+  ];
+  const fast = () => ["-- Fast Swim", ...random(1000, sel(Categories.Fast))];
+  const steady = () => [
+    "-- Steady Swim",
+    ...random(1200, sel(Categories.Steady)),
+  ];
+  const tech = (m: number) => {
+    const items = sel(Categories.Tech);
+    const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
+    const type = types[Math.round(Math.random() * (types.length - 1))];
+    return [
+      "-- Technique",
+      ...random(
+        m,
+        items.filter((x) => kind(x.parsed.desc) == type)
+      ),
+    ];
+  };
+  return [
+    [`# Day 1`],
+    warmup(),
+    tech(800),
+    sprint(),
+    rest(),
+    [""],
+    [`# Day 2`],
+    warmup(),
+    tech(400),
+    endurance(),
+    [""],
+    [`# Day 3`],
+    warmup(),
+    tech(400),
+    fast(),
+    rest(),
+    [""],
+    [`# Day 4`],
+    steady(),
+  ]
+    .flat()
+    .join("\n");
+};
 
 const kind = (line: string) => line.split(" ")[0];
 
-export const sst = () => {
-  const entries = parseSuperset();
-  entries.forEach((e) => {
-    const unknownTags = e.tags.filter((x) => !Object.values(Tags).includes(x));
-    if (unknownTags.length > 0) {
-      console.warn("unknown tags: " + unknownTags);
-    }
-    e.parsed.desc += " // " + e.comments.join(" ");
-  });
-  const sel = (tag: string) =>
-    entries.filter((item) => item.tags.includes(tag));
-  const techset = (m: number) => {
-    const items = sel(Tags.Tech);
-    const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
-    const type = types[Math.round(Math.random() * (types.length - 1))];
-    return random(
-      "Technique",
-      m,
-      items.filter((x) => kind(x.parsed.desc) == type)
-    );
-  };
-  return [
-    `# Day 1\n`,
-    [
-      random("Warmup", 200, sel(Tags.Wup), 0.5),
-      techset(800),
-      random("Sprint", 200, sel(Tags.Spr)),
-      random("Rest", 200, sel(Tags.Rest)),
-    ].join("\n"),
-
-    `\n# Day 2\n`,
-    [
-      random("Warmup", 200, sel(Tags.Wup), 0.5),
-      techset(400),
-      random("Endurance", 1200, sel(Tags.End)),
-    ].join("\n"),
-
-    `\n# Day 3\n`,
-    [
-      random("Warmup", 200, sel(Tags.Wup), 0.5),
-      techset(400),
-      random("Fast Swim", 1000, sel(Tags.Fast)),
-      random("Rest", 200, sel(Tags.Rest)),
-    ].join("\n"),
-
-    `\n# Day 4\n`,
-    [random("Steady Swim", 1200, sel(Tags.Steady))].join("\n"),
-  ].join("\n");
-};
-
-const random = (
-  title: string,
-  amount: number,
-  sets: Item[],
-  scale?: number
-) => {
+const random = (amount: number, sets: Item[], scale?: number) => {
+  if (sets.length == 0) return [];
   let total = 0;
-  let r = "-- " + title;
-  if (sets.length == 0) {
-    return r;
-  }
+  const r = [] as string[];
   let sanity = 10;
   while (total < amount && sanity-- > 0) {
-    const x = sets[Math.round(Math.random() * (sets.length - 1))];
-    const s = parseSet(x.line);
-    if (scale) {
-      s.forEach((line) => {
-        if (line.repeats > 1) {
-          line.repeats *= scale;
-        } else {
-          line.amount *= scale;
-        }
-      });
-    }
-    const len = s.map((line) => line.amount * line.repeats).reduce(sum);
-    total += len;
-    r += "\n" + formatSet(s);
+    const item = scaleItem(
+      sets[Math.round(Math.random() * (sets.length - 1))],
+      scale || 1
+    );
+    const p = item.parsed;
+    total += p.amount * p.repeats;
+    r.push(formatItem(item));
   }
   return r;
 };
 
-const parseSet = (text: string) => {
-  const lines = text
-    .split(/\n/)
-    .map((line) => line.trim())
-    .filter((line) => line != "");
-  return lines.map(parseLine);
+const formatItem = (item: Item) => {
+  const p = item.parsed;
+  let line = "";
+  if (p.repeats > 1) {
+    line += `${p.repeats}x`;
+  }
+  line += `${p.amount} ${p.desc}`;
+  if (p.tags.length > 0) {
+    line += " " + p.tags.map((t) => "#" + t).join(", ");
+  }
+  if (item.comments.length > 0) {
+    line += " // " + item.comments.join(" ");
+  }
+  return line;
 };
 
-const sum = (a: number, b: number) => a + b;
+const scaleItem = (item: Item, scale: number) => {
+  if (scale == 1) return item;
+  if (item.parsed.repeats > 1) {
+    return {
+      ...item,
+      parsed: {
+        ...item.parsed,
+        repeats: item.parsed.repeats * scale,
+      },
+    };
+  }
+  return {
+    ...item,
+    parsed: {
+      ...item.parsed,
+      amount: item.parsed.amount * scale,
+    },
+  };
+};
