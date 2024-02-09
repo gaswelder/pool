@@ -1,6 +1,16 @@
 import { Line, parseLine } from "../parser/shorthand";
 import { Item, parseSuperset } from "./superset";
 
+const Tags = {
+  Wup: "warmup",
+  Tech: "tech",
+  Spr: "sprint",
+  End: "endurance",
+  Fast: "fastswim",
+  Steady: "steadyswim",
+  Rest: "rest",
+};
+
 const formatSet = (lines: Line[]) =>
   lines.map(
     (line) =>
@@ -9,25 +19,21 @@ const formatSet = (lines: Line[]) =>
         .join(" ")}`
   );
 
-const Wup = "warmup";
-const Tech = "tech";
-const Spr = "sprint";
-const End = "endurance";
-const Fast = "fastswim";
-const Steady = "steadyswim";
-const Rest = "rest";
-
 const kind = (line: string) => line.split(" ")[0];
 
 export const sst = () => {
   const entries = parseSuperset();
   entries.forEach((e) => {
+    const unknownTags = e.tags.filter((x) => !Object.values(Tags).includes(x));
+    if (unknownTags.length > 0) {
+      console.warn("unknown tags: " + unknownTags);
+    }
     e.parsed.desc += " // " + e.comments.join(" ");
   });
   const sel = (tag: string) =>
     entries.filter((item) => item.tags.includes(tag));
   const techset = (m: number) => {
-    const items = sel(Tech);
+    const items = sel(Tags.Tech);
     const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
     const type = types[Math.round(Math.random() * (types.length - 1))];
     return random(
@@ -39,29 +45,29 @@ export const sst = () => {
   return [
     `# Day 1\n`,
     [
-      random("Warmup", 200, sel(Wup), 0.5),
+      random("Warmup", 200, sel(Tags.Wup), 0.5),
       techset(800),
-      random("Sprint", 200, sel(Spr)),
-      random("Rest", 200, sel(Rest)),
+      random("Sprint", 200, sel(Tags.Spr)),
+      random("Rest", 200, sel(Tags.Rest)),
     ].join("\n"),
 
     `\n# Day 2\n`,
     [
-      random("Warmup", 200, sel(Wup), 0.5),
+      random("Warmup", 200, sel(Tags.Wup), 0.5),
       techset(400),
-      random("Endurance", 1200, sel(End)),
+      random("Endurance", 1200, sel(Tags.End)),
     ].join("\n"),
 
     `\n# Day 3\n`,
     [
-      random("Warmup", 200, sel(Wup), 0.5),
+      random("Warmup", 200, sel(Tags.Wup), 0.5),
       techset(400),
-      random("Fast Swim", 1000, sel(Fast)),
-      random("Rest", 200, sel(Rest)),
+      random("Fast Swim", 1000, sel(Tags.Fast)),
+      random("Rest", 200, sel(Tags.Rest)),
     ].join("\n"),
 
     `\n# Day 4\n`,
-    [random("Steady Swim", 1200, sel(Steady))].join("\n"),
+    [random("Steady Swim", 1200, sel(Tags.Steady))].join("\n"),
   ].join("\n");
 };
 
