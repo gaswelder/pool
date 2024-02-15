@@ -1,13 +1,11 @@
 import { Item, parseSuperset } from "./superset";
 
 const Categories = {
-  Wup: "warmup",
   Tech: "tech",
   Spr: "sprint",
   End: "endurance",
   Fast: "fastswim",
   Steady: "steadyswim",
-  Rest: "rest",
 };
 
 export const sst = () => {
@@ -32,9 +30,9 @@ export const sst = () => {
     });
   });
 
-  const warmup = () => ["-- Warmup", ...random(200, sel(Categories.Wup), 0.5)];
+  const warmup = () => ["200 warmup"];
   const sprint = () => ["-- Sprint", ...random(200, sel(Categories.Spr))];
-  const rest = () => ["-- Rest", ...random(200, sel(Categories.Rest))];
+  const rest = () => ["200 rest"];
   const endurance = () => [
     "-- Endurance",
     ...random(1200, sel(Categories.End)),
@@ -83,16 +81,13 @@ export const sst = () => {
 
 const kind = (line: string) => line.split(" ")[0];
 
-const random = (amount: number, sets: Item[], scale?: number) => {
+const random = (amount: number, sets: Item[]) => {
   if (sets.length == 0) return [];
   let total = 0;
   const r = [] as string[];
   let sanity = 10;
   while (total < amount && sanity-- > 0) {
-    const item = scaleItem(
-      sets[Math.round(Math.random() * (sets.length - 1))],
-      scale || 1
-    );
+    const item = sets[Math.round(Math.random() * (sets.length - 1))];
     const p = item.parsed;
     total += p.amount * p.repeats;
     r.push(formatItem(item));
@@ -114,24 +109,4 @@ const formatItem = (item: Item) => {
     line += " // " + item.comments.join(" ");
   }
   return line;
-};
-
-const scaleItem = (item: Item, scale: number) => {
-  if (scale == 1) return item;
-  if (item.parsed.repeats > 1) {
-    return {
-      ...item,
-      parsed: {
-        ...item.parsed,
-        repeats: item.parsed.repeats * scale,
-      },
-    };
-  }
-  return {
-    ...item,
-    parsed: {
-      ...item.parsed,
-      amount: item.parsed.amount * scale,
-    },
-  };
 };
