@@ -60,7 +60,9 @@ export const sst = () => {
     const grouped = groupBy(items, (x) => pickOne(x.categories));
     return Object.entries(grouped)
       .map(([category, items]) => {
-        return ["-- " + category, ...items.map(formatItem)];
+        const itemGroups = groupBy(items, (x) => kind(x.parsed.desc));
+        const ordered = Object.values(itemGroups).flat();
+        return ["-- " + category, ...ordered.map(formatItem)];
       })
       .flat();
   };
