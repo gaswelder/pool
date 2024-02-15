@@ -34,17 +34,6 @@ export const parseLine = (line: string) => {
     };
   }
 
-  // 10 x (25 cr + 25 br)
-  // 2 x (4x25 cr + 4x25 br)
-  // if (buf.peek() == "(") {
-  //   const s = buf.rest();
-  //   return {
-  //     name: "",
-  //     repeats: parseInt(a, 10),
-  //     ex: parseStepsLine(s.substring(1, s.length - 1)),
-  //   };
-  // }
-
   throw new Error(`unknown line format: ${glance(line)}`);
 };
 
@@ -60,9 +49,6 @@ const parseDescription = (buf: PBuf) => {
   const tags = [] as string[];
   const words = [] as string[];
   while (buf.peek() !== null) {
-    if (buf.peek() == "+") {
-      break;
-    }
     const part = buf.word();
     buf.spaces();
     if (part[0] == "#") {
