@@ -15,13 +15,6 @@ export const sst = () => {
   const sel = (tag: string) => byCategory.get(tag) || [];
 
   entries.forEach((e) => {
-    const unknownCats = e.categories.filter(
-      (x) => !Object.values(Categories).includes(x)
-    );
-    if (unknownCats.length > 0) {
-      console.warn("unknown tags: " + unknownCats);
-    }
-
     byCategory.get("")!.push(e);
     e.categories.forEach((cat) => {
       const list = byCategory.get(cat);
@@ -54,6 +47,29 @@ export const sst = () => {
       ),
     ];
   };
+  const rand = (m: number) => {
+    const items = random0(m, entries)
+      .map((item) => {
+        console.log(item.categories);
+        return {
+          ...item,
+          category: pickOne(item.categories),
+        };
+      })
+      .reduce((s, item) => {
+        const k = item.category;
+        return {
+          ...s,
+          [k]: [...(s[k] || []), item],
+        };
+      }, {} as Record<string, Item[]>);
+
+    return Object.entries(items)
+      .map(([category, items]) => {
+        return ["-- " + category, ...items.map(formatItem)];
+      })
+      .flat();
+  };
   return [
     [`# Day 1`],
     warmup(),
@@ -74,6 +90,10 @@ export const sst = () => {
     [""],
     [`# Day 4`],
     steady(),
+    ["# Random"],
+    warmup(),
+    rand(1600),
+    rest(),
   ]
     .flat()
     .join("\n");
@@ -81,18 +101,26 @@ export const sst = () => {
 
 const kind = (line: string) => line.split(" ")[0];
 
-const random = (amount: number, sets: Item[]) => {
+const pickOne = <T>(xs: T[]) => {
+  return xs[Math.round(Math.random() * (xs.length - 1))];
+};
+
+const random0 = (amount: number, sets: Item[]) => {
   if (sets.length == 0) return [];
   let total = 0;
-  const r = [] as string[];
+  const r = [] as Item[];
   let sanity = 10;
   while (total < amount && sanity-- > 0) {
-    const item = sets[Math.round(Math.random() * (sets.length - 1))];
+    const item = pickOne(sets);
     const p = item.parsed;
     total += p.amount * p.repeats;
-    r.push(formatItem(item));
+    r.push(item);
   }
   return r;
+};
+
+const random = (amount: number, sets: Item[]) => {
+  return random0(amount, sets).map(formatItem);
 };
 
 const formatItem = (item: Item) => {
