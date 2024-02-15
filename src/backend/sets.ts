@@ -47,24 +47,18 @@ export const sst = () => {
       ),
     ];
   };
-  const rand = (m: number) => {
-    const items = random0(m, entries)
-      .map((item) => {
-        console.log(item.categories);
-        return {
-          ...item,
-          category: pickOne(item.categories),
-        };
-      })
-      .reduce((s, item) => {
-        const k = item.category;
-        return {
-          ...s,
-          [k]: [...(s[k] || []), item],
-        };
-      }, {} as Record<string, Item[]>);
 
-    return Object.entries(items)
+  const groupBy = <T>(xs: T[], key: (x: T) => string) => {
+    return xs.reduce((s, item) => {
+      const k = key(item);
+      return { ...s, [k]: [...(s[k] || []), item] };
+    }, {} as Record<string, T[]>);
+  };
+
+  const rand = (m: number) => {
+    const items = random0(m, entries);
+    const grouped = groupBy(items, (x) => pickOne(x.categories));
+    return Object.entries(grouped)
       .map(([category, items]) => {
         return ["-- " + category, ...items.map(formatItem)];
       })
