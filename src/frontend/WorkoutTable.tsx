@@ -4,9 +4,17 @@ import { Theme } from "./theme";
 import { Fragment } from "react";
 import { SetProg } from "./draft";
 
+const reps = (title: string) => {
+  const m = title.match(/^(\d+)\s*x/);
+  if (m) {
+    return parseInt(m[1], 10);
+  }
+  return 1;
+};
 const sum = (a: number, b: number) => a + b;
 const lineVolume = (line: Line) => line.repeats * line.amount;
-const setVolume = (set: SetProg) => set.lines.map(lineVolume).reduce(sum, 0);
+const setVolume = (set: SetProg) =>
+  reps(set.name) * set.lines.map(lineVolume).reduce(sum, 0);
 const workoutVolume = (w: SetProg[]) => w.map(setVolume).reduce(sum, 0);
 
 const Table = styled.table`
