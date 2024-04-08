@@ -92,9 +92,9 @@ const Content = () => {
       setInitialized(true);
     }
   };
-  useEffect(() => {
-    init().catch(console.error);
-  }, []);
+  // useEffect(() => {
+  //   init().catch(console.error);
+  // }, []);
 
   switch (location.pathname) {
     case "/":
