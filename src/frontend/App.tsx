@@ -5,6 +5,7 @@ import { Draft } from "./Draft";
 import { useLocation } from "./lib/A";
 import { Collapsible } from "./lib/Collapsible";
 import { Theme } from "./theme";
+import { Item } from "../backend/superset";
 
 const AppDiv = styled.div`
   background: #d1dfec;
@@ -76,8 +77,40 @@ const call = async (method: string, params?: unknown) => {
   return body.data;
 };
 
+const formatItem = (item: Item) => {
+  const p = item.parsed;
+  let line = "";
+  if (p.repeats > 1) {
+    line += `${p.repeats}x`;
+  }
+  line += `${p.amount} ${p.desc}`;
+  if (p.tags.length > 0) {
+    line += " " + p.tags.map((t) => "#" + t).join(", ");
+  }
+  if (item.comments.length > 0) {
+    line += " // " + item.comments.join(" ");
+  }
+  return line;
+};
+
+const formatSet = (set: { title: string; elements: Item[] }) => {
+  return ["-- " + set.title, ...set.elements.flatMap(formatItem)];
+};
+
+const formatDay = (day: {
+  title: string;
+  sets: { title: string; elements: Item[] }[];
+}) => {
+  return [`# ${day.title}`, ...day.sets.flatMap(formatSet)];
+};
+
 const gen = async () => {
-  return call("generate", {});
+  const r = (await call("generate", {})) as {
+    title: string;
+    sets: { title: string; elements: Item[] }[];
+  }[];
+
+  return r.flatMap(formatDay).join("\n");
 };
 
 const Content = () => {

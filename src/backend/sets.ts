@@ -1,16 +1,39 @@
 import { Item, parseSuperset } from "./superset";
 
-const Categories = {
-  Tech: "tech",
-  Spr: "sprint",
-  End: "endurance",
-  Fast: "fastswim",
-  Steady: "steadyswim",
+export const sst = () => {
+  const gen = makeGen(parseSuperset());
+  return [
+    {
+      title: "Day 1",
+      sets: [gen.warmup(), gen.tech(800), gen.sprint(), gen.rest()],
+    },
+    {
+      title: "Day 2",
+      sets: [gen.warmup(), gen.tech(400), gen.endurance()],
+    },
+    {
+      title: "Day 3",
+      sets: [gen.warmup(), gen.tech(400), gen.fast(), gen.rest()],
+    },
+    {
+      title: "Day 4",
+      sets: [gen.steady()],
+    },
+    {
+      title: "Random",
+      sets: [gen.warmup(), ...gen.rand(1600), gen.rest()],
+    },
+  ];
 };
 
-export const sst = () => {
-  const entries = parseSuperset();
-
+const makeGen = (entries: Item[]) => {
+  const Categories = {
+    Tech: "tech",
+    Spr: "sprint",
+    End: "endurance",
+    Fast: "fastswim",
+    Steady: "steadyswim",
+  };
   const byCategory = new Map([["", [] as Item[]]]);
   const sel = (tag: string) => byCategory.get(tag) || [];
 
@@ -23,31 +46,6 @@ export const sst = () => {
     });
   });
 
-  const warmup = () => ["200 warmup"];
-  const sprint = () => ["-- Sprint", ...random(200, sel(Categories.Spr))];
-  const rest = () => ["200 rest"];
-  const endurance = () => [
-    "-- Endurance",
-    ...random(1200, sel(Categories.End)),
-  ];
-  const fast = () => ["-- Fast Swim", ...random(1000, sel(Categories.Fast))];
-  const steady = () => [
-    "-- Steady Swim",
-    ...random(1200, sel(Categories.Steady)),
-  ];
-  const tech = (m: number) => {
-    const items = sel(Categories.Tech);
-    const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
-    const type = types[Math.round(Math.random() * (types.length - 1))];
-    return [
-      "-- Technique",
-      ...random(
-        m,
-        items.filter((x) => kind(x.parsed.desc) == type)
-      ),
-    ];
-  };
-
   const groupBy = <T>(xs: T[], key: (x: T) => string) => {
     return xs.reduce((s, item) => {
       const k = key(item);
@@ -55,44 +53,84 @@ export const sst = () => {
     }, {} as Record<string, T[]>);
   };
 
+  const makeItem = (amount: number, desc: string) => {
+    return {
+      comments: [],
+      history: [],
+      categories: [],
+      parsed: {
+        repeats: 1,
+        amount,
+        desc,
+        tags: [],
+      },
+      line: `${amount} ${desc}`,
+    };
+  };
+
+  const warmup = () => ({
+    title: "",
+    elements: [makeItem(200, "warmup")],
+  });
+  const rest = () => ({
+    title: "",
+    elements: [makeItem(200, "rest")],
+  });
+
+  const sprint = () => ({
+    title: "Sprint",
+    elements: getRandomSets(200, sel(Categories.Spr)),
+  });
+
+  const endurance = () => ({
+    title: "Endurance",
+    elements: getRandomSets(1200, sel(Categories.End)),
+  });
+
+  const fast = () => ({
+    title: "Fast Swim",
+    elements: getRandomSets(1000, sel(Categories.Fast)),
+  });
+
+  const steady = () => ({
+    title: "Steady Swim",
+    elements: getRandomSets(1200, sel(Categories.Steady)),
+  });
+
+  const tech = (m: number) => {
+    const items = sel(Categories.Tech);
+    const types = [...new Set(items.map((x) => kind(x.parsed.desc)))];
+    const type = types[Math.round(Math.random() * (types.length - 1))];
+    return {
+      title: "Technique",
+      elements: getRandomSets(
+        m,
+        items.filter((x) => kind(x.parsed.desc) == type)
+      ),
+    };
+  };
+
   const rand = (m: number) => {
-    const items = random0(m, entries);
+    const items = getRandomSets(m, entries);
     const grouped = groupBy(items, (x) => pickOne(x.categories));
     return Object.entries(grouped)
       .map(([category, items]) => {
         const itemGroups = groupBy(items, (x) => kind(x.parsed.desc));
         const ordered = Object.values(itemGroups).flat();
-        return ["-- " + category, ...ordered.map(formatItem)];
+        return { title: category, elements: ordered };
       })
       .flat();
   };
-  return [
-    [`# Day 1`],
-    warmup(),
-    tech(800),
-    sprint(),
-    rest(),
-    [""],
-    [`# Day 2`],
-    warmup(),
-    tech(400),
-    endurance(),
-    [""],
-    [`# Day 3`],
-    warmup(),
-    tech(400),
-    fast(),
-    rest(),
-    [""],
-    [`# Day 4`],
-    steady(),
-    ["# Random"],
-    warmup(),
-    rand(1600),
-    rest(),
-  ]
-    .flat()
-    .join("\n");
+  return {
+    warmup,
+    tech,
+    sprint,
+    rest,
+    endurance,
+    fast,
+    steady,
+    rand,
+  };
 };
 
 const kind = (line: string) => line.split(" ")[0];
@@ -101,7 +139,7 @@ const pickOne = <T>(xs: T[]) => {
   return xs[Math.round(Math.random() * (xs.length - 1))];
 };
 
-const random0 = (amount: number, sets: Item[]) => {
+const getRandomSets = (amount: number, sets: Item[]) => {
   if (sets.length == 0) return [];
   let total = 0;
   const r = [] as Item[];
@@ -113,24 +151,4 @@ const random0 = (amount: number, sets: Item[]) => {
     r.push(item);
   }
   return r;
-};
-
-const random = (amount: number, sets: Item[]) => {
-  return random0(amount, sets).map(formatItem);
-};
-
-const formatItem = (item: Item) => {
-  const p = item.parsed;
-  let line = "";
-  if (p.repeats > 1) {
-    line += `${p.repeats}x`;
-  }
-  line += `${p.amount} ${p.desc}`;
-  if (p.tags.length > 0) {
-    line += " " + p.tags.map((t) => "#" + t).join(", ");
-  }
-  if (item.comments.length > 0) {
-    line += " // " + item.comments.join(" ");
-  }
-  return line;
 };
