@@ -84,24 +84,16 @@ const Content = () => {
   const { location } = useLocation();
   const [text, setText] = useState("");
   const [ver, setVer] = useState(0);
-  const [initialized, setInitialized] = useState(false);
-  const init = async () => {
-    try {
-      setText(await gen());
-      setVer((x) => x + 1);
-    } finally {
-      setInitialized(true);
-    }
+  const load = async () => {
+    setText(await gen());
+    setVer((x) => x + 1);
   };
-  // useEffect(() => {
-  //   init().catch(console.error);
-  // }, []);
 
   switch (location.pathname) {
     case "/":
       return (
         <>
-          <button type="button" disabled={!initialized} onClick={init}>
+          <button type="button" onClick={load}>
             Generate
           </button>
           <Collapsible
