@@ -25,7 +25,7 @@ export const parseSuperset = () => {
         for (const x of categories) {
           p.desc = p.desc.replace(`[${x}]`, "");
         }
-        return { line, parsed: p, categories };
+        return { line, parsed: p, categories, kind: p.desc.split(" ")[0] };
       } catch (err) {
         continue;
       }
@@ -51,6 +51,7 @@ export const parseSuperset = () => {
       categories: ex.categories,
       parsed: ex.parsed,
       line: ex.line,
+      kind: ex.kind,
     };
   };
 

@@ -1,3 +1,4 @@
+import { groupBy } from "./lib";
 import { Item, parseSuperset } from "./superset";
 
 export const sst = () => {
@@ -46,13 +47,6 @@ const makeGen = (entries: Item[]) => {
     });
   });
 
-  const groupBy = <T>(xs: T[], key: (x: T) => string) => {
-    return xs.reduce((s, item) => {
-      const k = key(item);
-      return { ...s, [k]: [...(s[k] || []), item] };
-    }, {} as Record<string, T[]>);
-  };
-
   const makeItem = (amount: number, desc: string) => {
     return {
       comments: [],
@@ -65,6 +59,7 @@ const makeGen = (entries: Item[]) => {
         tags: [],
       },
       line: `${amount} ${desc}`,
+      kind: desc.split(" ")[0],
     };
   };
 
