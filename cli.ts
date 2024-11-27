@@ -50,10 +50,15 @@ const cmds = [
     name: "top",
     desc: "prints rusty exercises, accepts themes as arguments",
     f: (args: string[]) => {
-      const ss = parseSuperset().filter((x) => {
-        if (args.length == 0) return true;
-        return args.includes(x.kind);
-      });
+      const ss = parseSuperset()
+        .filter((x) => {
+          if (args.length == 0) return true;
+          return args.includes(x.kind);
+        })
+        .filter((x) => {
+          if (x.categories.includes("50")) return false;
+          return true;
+        });
       const lastTime = (x: Item) => {
         if (x.history.length == 0) return "2000-00-00";
         const m = x.history[x.history.length - 1].match(
