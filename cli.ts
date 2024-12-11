@@ -73,11 +73,11 @@ const cmds = [
       // Return item's last time as a timestamp.
       const lastTime = (x: Item) => {
         const ts = (s: string) => new Date(s).getTime();
-        if (x.history.length == 0) return ts("2000-00-00");
+        if (x.history.length == 0) return ts("2000-01-01");
         const m = x.history[x.history.length - 1].match(
           /(\d\d\d\d\-\d\d\-\d\d)/
         );
-        if (!m) return ts("2000-00-00");
+        if (!m) return ts("2000-01-01");
         return ts(m[1]);
       };
 
