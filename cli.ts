@@ -50,10 +50,20 @@ const cmds = [
     name: "top",
     desc: "prints rusty exercises, accepts themes as arguments",
     f: (args: string[]) => {
+      const include = [] as string[];
+      const exclude = [] as string[];
+      for (const arg of args) {
+        if (arg[0] == "-") {
+          exclude.push(arg.substring(1, arg.length));
+        } else {
+          include.push(arg);
+        }
+      }
       const ss = parseSuperset()
         .filter((x) => {
-          if (args.length == 0) return true;
-          return args.includes(x.kind);
+          if (include.length > 0 && !include.includes(x.kind)) return false;
+          if (exclude.length > 0 && exclude.includes(x.kind)) return false;
+          return true;
         })
         .filter((x) => {
           if (x.categories.includes("50")) return false;
