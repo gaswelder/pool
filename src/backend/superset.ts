@@ -21,7 +21,9 @@ export const parseSuperset = () => {
       try {
         const p = parseLine(line);
         // Extract tags from the line
-        const categories = [...p.desc.matchAll(/\[(\w+)\]/g)].map((x) => x[1]);
+        const categories = [...p.desc.matchAll(/\[([\w=]+)\]/g)].map(
+          (x) => x[1]
+        );
         for (const x of categories) {
           p.desc = p.desc.replace(`[${x}]`, "");
         }

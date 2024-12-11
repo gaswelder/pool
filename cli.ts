@@ -59,20 +59,33 @@ const cmds = [
           if (x.categories.includes("50")) return false;
           return true;
         });
+
+      // Return item's last time as a timestamp.
       const lastTime = (x: Item) => {
-        if (x.history.length == 0) return "2000-00-00";
+        const ts = (s: string) => new Date(s).getTime();
+        if (x.history.length == 0) return ts("2000-00-00");
         const m = x.history[x.history.length - 1].match(
           /(\d\d\d\d\-\d\d\-\d\d)/
         );
-        if (!m) return "2000-00-00";
-        return m[1];
+        if (!m) return ts("2000-00-00");
+        return ts(m[1]);
       };
-      ss.sort((a, b) => {
-        return lastTime(a).localeCompare(lastTime(b));
+
+      const now = Date.now();
+      const rows = ss.map((s) => {
+        let gap = now - lastTime(s);
+        // Exercises marked as r=2 will be scheduled twice as often.
+        if (s.categories.includes("r=2")) {
+          gap *= 2;
+        }
+        return { s, gap };
       });
-      ss.slice(0, 10).forEach((x) => {
-        format(x);
-      });
+      rows
+        .sort((a, b) => b.gap - a.gap)
+        .slice(0, 10)
+        .forEach((x) => {
+          format(x.s);
+        });
     },
   },
 ];
