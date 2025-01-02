@@ -91,7 +91,10 @@ const cmds = [
         return { s, gap };
       });
       rows
-        .sort((a, b) => b.gap - a.gap)
+        .sort((a, b) => {
+          if (a.gap != b.gap) return b.gap - a.gap;
+          return Math.random() - 0.5;
+        })
         .slice(0, 10)
         .forEach((x) => {
           format(x.s);
