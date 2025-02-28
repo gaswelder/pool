@@ -61,6 +61,17 @@ const lastTime = (x: Item) => {
 
 const cmds = [
   {
+    name: "ls",
+    desc: "prints all exercises",
+    f: () => {
+      parseSuperset()
+        .sort((a, b) => a.kind.localeCompare(b.kind))
+        .forEach((s) => {
+          console.log(s.line);
+        });
+    },
+  },
+  {
     name: "themes",
     f: () => {
       const g = groupBy(parseSuperset(), (x) => x.kind);
