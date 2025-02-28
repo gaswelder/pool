@@ -30,6 +30,19 @@ const gensst = () => {
   }
 };
 
+// Toy randomizer, has to produce the same sequence for our purposes.
+const lcg = () => {
+  let val = 0;
+  const m = 567567;
+  const a = 123123;
+  const mod = 2 ** 16;
+  val = (((val * m) % mod) + a) % mod;
+  return () => {
+    val = (((val * m) % mod) + a) % mod;
+    return val;
+  };
+};
+
 /**
  * Returns item's last time as a timestamp.
  */
@@ -77,6 +90,7 @@ const cmds = [
       }
 
       const now = Date.now();
+      const rnd = lcg();
 
       parseSuperset()
         // Select exercises that match the filter.
@@ -103,10 +117,15 @@ const cmds = [
         })
         // Sort by the calculated priority.
         .sort((a, b) => {
-          if (a.gap != b.gap) return b.gap - a.gap;
-          return Math.random() - 0.5;
+          if (a.gap != b.gap) {
+            return b.gap - a.gap;
+          }
+          // If most exercises have empty history the command would just return
+          // them in the list order. To prevent that we shuffle them.
+          return rnd() - rnd();
         })
         .slice(0, 10)
+        .sort((a, b) => a.s.kind.localeCompare(b.s.kind))
         .forEach((x) => {
           format(x.s);
         });
