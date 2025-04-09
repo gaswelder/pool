@@ -1,3 +1,4 @@
+import { parseArgs } from "./clilib";
 import { groupBy } from "./src/backend/lib";
 import { sst } from "./src/backend/sets";
 import { Item, parseSuperset } from "./src/backend/superset";
@@ -90,14 +91,13 @@ const cmds = [
     name: "top",
     desc: "prints rusty exercises, accepts themes as arguments",
     f: (args: string[]) => {
-      const include = [] as string[];
-      const exclude = [] as string[];
-      for (const arg of args) {
-        if (arg[0] == "-") {
-          exclude.push(arg.substring(1, arg.length));
-        } else {
-          include.push(arg);
-        }
+      // top [-e kind,kind,...] [-n count] [kind ...]
+      const [params, include] = parseArgs({ e: true, n: true }, args);
+
+      const exclude = params.e.split(",");
+      let n = 10;
+      if (params.n != "") {
+        n = parseInt(params.n, 10);
       }
 
       const now = Date.now();
@@ -135,7 +135,7 @@ const cmds = [
           // them in the list order. To prevent that we shuffle them.
           return rnd() - rnd();
         })
-        .slice(0, 10)
+        .slice(0, n)
         .sort((a, b) => a.s.kind.localeCompare(b.s.kind))
         .forEach((x) => {
           format(x.s);
