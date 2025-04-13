@@ -93,9 +93,11 @@ const cmds = [
     name: "themes",
     f: () => {
       const g = groupBy(parseSuperset(), (x) => x.kind);
-      Object.entries(g).map(([k, v]) => {
-        console.log(k, v.length);
-      });
+      Object.entries(g)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([k, v]) => {
+          console.log(v.length + "\t" + k);
+        });
     },
     desc: "prints themes and the number of exercises for each",
   },
