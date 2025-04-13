@@ -5,15 +5,32 @@ import { Item, parseSuperset } from "./src/backend/superset";
 
 const tab = "  ";
 
+const formatText = (s: string, indent: string) => {
+  const words = s.split(/\s+/g);
+
+  const lines = [] as string[];
+  while (words.length > 0) {
+    let line = "";
+    if (lines.length > 0) {
+      line += indent;
+    }
+    while (words.length > 0 && line.length + 1 + words[0].length <= 80) {
+      line += words.shift() + " ";
+    }
+    lines.push(line);
+  }
+  return lines.join("\n");
+};
+
 const format = (el: Item) => {
-  console.log(el.line);
+  console.log("* " + formatText(el.line, "  "));
   el.comments.forEach((x) => {
-    console.log(x);
+    console.log(formatText(x, ""));
   });
   el.history.forEach((x) => {
-    console.log(x);
+    console.log("  " + formatText(x, "      "));
   });
-  console.log("");
+  console.log("\n");
 };
 
 const gensst = () => {
