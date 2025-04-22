@@ -131,6 +131,7 @@ const cmds = [
         })
         .filter((x) => {
           if (x.categories.includes("50")) return false;
+          if (x.categories.includes("meh")) return false;
           return true;
         })
         // Add priority to each match based on how long ago it was
