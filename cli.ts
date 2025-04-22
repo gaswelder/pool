@@ -156,7 +156,6 @@ const cmds = [
           return rnd() - rnd();
         })
         .slice(0, n)
-        .sort((a, b) => a.s.kind.localeCompare(b.s.kind))
         .forEach((x) => {
           format(x.s);
         });
