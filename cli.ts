@@ -122,22 +122,29 @@ const cmds = [
       const now = Date.now();
       const rnd = lcg();
 
-      parseSuperset()
-        // Select exercises that match the filter.
-        .filter((x) => {
-          if (include.length > 0 && !include.includes(x.kind)) return false;
-          if (exclude.length > 0 && exclude.includes(x.kind)) return false;
-          return true;
-        })
-        .filter((x) => {
-          if (x.categories.includes("50")) return false;
-          if (x.categories.includes("meh")) return false;
-          return true;
-        })
-        // Add priority to each match based on how long ago it was
-        // logged last time.
+      // Select exercises that match the filter.
+      const exers = parseSuperset().filter((x) => {
+        if (include.length > 0 && !include.includes(x.kind)) return false;
+        if (exclude.length > 0 && exclude.includes(x.kind)) return false;
+        if (x.categories.includes("50")) return false;
+        if (x.categories.includes("meh")) return false;
+        return true;
+      });
+
+      const gg = groupBy(exers, (x) => x.kind);
+
+      const m = Object.values(gg)
+        .map((x) => x.length)
+        .reduce((a, b) => a * b, 1);
+      const w = Object.fromEntries(
+        Object.entries(gg).map((e) => [e[0], m / e[1].length])
+      );
+
+      // Add priority to each match based on how long ago it was
+      // logged last time.
+      exers
         .map((s) => {
-          let gap = now - lastTime(s);
+          let gap = (now - lastTime(s)) * w[s.kind];
           // Exercises marked as r=2 will be scheduled twice as often.
           // This would work for an arbitrary factor, not just 2, but only 2
           // was needed so far.
