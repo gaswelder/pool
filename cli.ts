@@ -77,6 +77,17 @@ const lastTime = (x: Item) => {
   return ts(m[1]);
 };
 
+const priority = (x: Item) => {
+  let p = Date.now() - lastTime(x);
+  // Exercises marked as r=2 will be scheduled twice as often.
+  // This would work for an arbitrary factor, not just 2, but only 2
+  // was needed so far.
+  if (x.categories.includes("r=2")) {
+    p *= 2;
+  }
+  return p;
+};
+
 const cmds = [
   {
     name: "ls",
@@ -115,11 +126,11 @@ const cmds = [
 
       const exclude = params.e.split(",");
       let n = 10;
+      const nkinds = 2;
       if (params.n != "") {
         n = parseInt(params.n, 10);
       }
 
-      const now = Date.now();
       const rnd = lcg();
 
       // Select exercises that match the filter.
@@ -131,41 +142,38 @@ const cmds = [
         return true;
       });
 
-      const gg = groupBy(exers, (x) => x.kind);
-
-      const m = Object.values(gg)
-        .map((x) => x.length)
-        .reduce((a, b) => a * b, 1);
-      const w = Object.fromEntries(
-        Object.entries(gg).map((e) => [e[0], m / e[1].length])
-      );
-
-      // Add priority to each match based on how long ago it was
-      // logged last time.
-      exers
-        .map((s) => {
-          let gap = (now - lastTime(s)) * w[s.kind];
-          // Exercises marked as r=2 will be scheduled twice as often.
-          // This would work for an arbitrary factor, not just 2, but only 2
-          // was needed so far.
-          if (s.categories.includes("r=2")) {
-            gap *= 2;
-          }
-          return { s, gap };
+      const byKind = Object.entries(groupBy(exers, (x) => x.kind))
+        .map((e) => {
+          const items = e[1];
+          return [
+            e[0],
+            { items, lastTime: Math.max(...items.map(lastTime)) },
+          ] as const;
         })
-        // Sort by the calculated priority.
-        .sort((a, b) => {
-          if (a.gap != b.gap) {
-            return b.gap - a.gap;
-          }
-          // If most exercises have empty history the command would just return
-          // them in the list order. To prevent that we shuffle them.
-          return rnd() - rnd();
-        })
-        .slice(0, n)
-        .forEach((x) => {
+        .sort((a, b) => a[1].lastTime - b[1].lastTime)
+        .slice(0, 2);
+
+      const choose = (xs: Item[]) =>
+        xs
+          .map((s) => {
+            const gap = priority(s);
+            return { s, gap };
+          })
+          .sort((a, b) => {
+            if (a.gap != b.gap) {
+              return b.gap - a.gap;
+            }
+            // If most exercises have empty history, the command would just return
+            // them in the list order. Shuffle to prevent that.
+            return rnd() - rnd();
+          })
+          .slice(0, Math.ceil(n / nkinds));
+
+      for (let i = 0; i < nkinds; i++) {
+        choose(byKind[i][1].items).forEach((x) => {
           format(x.s);
         });
+      }
     },
   },
 ];
