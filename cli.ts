@@ -22,8 +22,8 @@ const formatText = (s: string, indent: string) => {
   return lines.join("\n");
 };
 
-const format = (el: Item) => {
-  console.log("* " + formatText(el.line, "  "));
+const format = (el: Item, i: number) => {
+  console.log(`${i + 1}. ` + formatText(el.line, "  "));
   el.comments.forEach((x) => {
     console.log(formatText(x, ""));
   });
@@ -41,7 +41,7 @@ const gensst = () => {
     for (const set of day.sets) {
       console.log(tab, set.title);
       for (const el of set.elements) {
-        format(el);
+        format(el, 0);
       }
     }
     console.log("\n");
