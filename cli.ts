@@ -88,6 +88,40 @@ const priority = (x: Item) => {
   return p;
 };
 
+const order = (xs: Item[], rnd: () => number) => {
+  return xs
+    .map((s) => {
+      return { s, gap: priority(s) };
+    })
+    .sort((a, b) => {
+      if (a.gap != b.gap) {
+        return b.gap - a.gap;
+      }
+      // If most exercises have empty history, the command would just return
+      // them in the list order. Shuffle to prevent that.
+      return rnd() - rnd();
+    })
+    .map((x) => x.s);
+};
+
+const roundRobin = <T>(groups: T[][]) => {
+  const r = [] as T[];
+  const pos = groups.map((g) => 0);
+
+  for (;;) {
+    let ok = false;
+    groups.forEach((g, i) => {
+      if (pos[i] < g.length) {
+        ok = true;
+        r.push(g[pos[i]]);
+        pos[i]++;
+      }
+    });
+    if (!ok) break;
+  }
+  return r;
+};
+
 const cmds = [
   {
     name: "ls",
@@ -142,38 +176,26 @@ const cmds = [
         return true;
       });
 
-      const byKind = Object.entries(groupBy(exers, (x) => x.kind))
+      // Group by kind, add staleness to each group
+      // and get the `nkinds` top stale groups.
+      const groups = Object.entries(groupBy(exers, (x) => x.kind))
         .map((e) => {
-          const items = e[1];
-          return [
-            e[0],
-            { items, lastTime: Math.max(...items.map(lastTime)) },
-          ] as const;
+          const items = order(e[1], rnd);
+          return {
+            group: e[0],
+            lastTime: Math.max(...items.map(lastTime)),
+            items,
+          };
         })
-        .sort((a, b) => a[1].lastTime - b[1].lastTime)
-        .slice(0, 2);
+        .sort((a, b) => a.lastTime - b.lastTime)
+        .slice(0, nkinds);
 
-      const choose = (xs: Item[]) =>
-        xs
-          .map((s) => {
-            const gap = priority(s);
-            return { s, gap };
-          })
-          .sort((a, b) => {
-            if (a.gap != b.gap) {
-              return b.gap - a.gap;
-            }
-            // If most exercises have empty history, the command would just return
-            // them in the list order. Shuffle to prevent that.
-            return rnd() - rnd();
-          })
-          .slice(0, Math.ceil(n / nkinds));
+      // We want `n` exercises from `nkinds` groups, but the groups will
+      // have uneven sizes. Getting n/nkinds from each is too rough, so we'll
+      // do a round robin.
+      const top = roundRobin(groups.map((x) => x.items)).slice(0, n);
 
-      for (let i = 0; i < nkinds; i++) {
-        choose(byKind[i][1].items).forEach((x) => {
-          format(x.s);
-        });
-      }
+      top.forEach(format);
     },
   },
 ];
