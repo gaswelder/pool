@@ -6,10 +6,8 @@ export type Item = ReturnType<typeof parseSuperset>[0];
 /**
  * Reads and parses the superset file.
  */
-export const parseSuperset = () => {
-  const text = fs
-    .readFileSync("/home/gas/code/priv/notes/plan-superset.md")
-    .toString();
+export const parseSuperset = (path: string) => {
+  const text = fs.readFileSync(path).toString();
   const lines = text.split("\n").map((s) => s.trim());
 
   const nextEx = () => {

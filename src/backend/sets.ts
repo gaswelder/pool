@@ -1,8 +1,8 @@
 import { groupBy } from "./lib";
 import { Item, parseSuperset } from "./superset";
 
-export const sst = () => {
-  const gen = makeGen(parseSuperset());
+export const sst = (path: string) => {
+  const gen = makeGen(parseSuperset(path));
   return [
     {
       title: "Day 1",

@@ -5,6 +5,11 @@ import { Item, parseSuperset } from "./src/backend/superset";
 
 const tab = "  ";
 
+const sspath = process.env.SSPATH;
+if (!sspath) {
+  throw new Error("pass SSPATH env var");
+}
+
 const formatText = (s: string, indent: string) => {
   const words = s.split(/\s+/g);
 
@@ -34,7 +39,7 @@ const format = (el: Item, i: number) => {
 };
 
 const gensst = () => {
-  const days = sst();
+  const days = sst(sspath);
 
   for (const day of days) {
     console.log(day.title);
@@ -127,7 +132,7 @@ const cmds = [
     name: "ls",
     desc: "prints all exercises",
     f: () => {
-      parseSuperset()
+      parseSuperset(sspath)
         .sort((a, b) => a.kind.localeCompare(b.kind))
         .forEach((s) => {
           console.log(s.line);
@@ -137,7 +142,7 @@ const cmds = [
   {
     name: "themes",
     f: () => {
-      const g = groupBy(parseSuperset(), (x) => x.kind);
+      const g = groupBy(parseSuperset(sspath), (x) => x.kind);
       Object.entries(g)
         .sort((a, b) => b[1].length - a[1].length)
         .map(([k, v]) => {
@@ -168,7 +173,7 @@ const cmds = [
       const rnd = lcg();
 
       // Select exercises that match the filter.
-      const exers = parseSuperset().filter((x) => {
+      const exers = parseSuperset(sspath).filter((x) => {
         if (include.length > 0 && !include.includes(x.kind)) return false;
         if (exclude.length > 0 && exclude.includes(x.kind)) return false;
         if (x.categories.includes("50")) return false;
