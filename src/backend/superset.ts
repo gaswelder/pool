@@ -52,6 +52,21 @@ export const parseSuperset = (path: string) => {
       parsed: ex.parsed,
       line: ex.line,
       kind: ex.kind,
+      /**
+       * Returns the item's last time as a timestamp.
+       */
+      lastTime() {
+        const ts = (s: string) => new Date(s).getTime();
+        const n = history.length;
+        if (n == 0) {
+          return ts("2000-01-01");
+        }
+        const m = history[n - 1].match(/(\d\d\d\d\-\d\d\-\d\d)/);
+        if (!m) {
+          return ts("2000-01-01");
+        }
+        return ts(m[1]);
+      },
     };
   };
 

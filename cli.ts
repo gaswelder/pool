@@ -1,14 +1,18 @@
 import { parseArgs } from "./clilib";
 import { groupBy } from "./src/backend/lib";
-import { sst } from "./src/backend/sets";
 import { Item, parseSuperset } from "./src/backend/superset";
-
-const tab = "  ";
 
 const sspath = process.env.SSPATH;
 if (!sspath) {
   throw new Error("pass SSPATH env var");
 }
+
+const ss = () =>
+  parseSuperset(sspath).filter((x) => {
+    if (x.categories.includes("50")) return false;
+    if (x.categories.includes("meh")) return false;
+    return true;
+  });
 
 const formatText = (s: string, indent: string) => {
   const words = s.split(/\s+/g);
@@ -28,29 +32,15 @@ const formatText = (s: string, indent: string) => {
 };
 
 const format = (el: Item, i: number) => {
-  console.log(`${i + 1}. ` + formatText(el.line, "  "));
+  // console.log(`${i + 1}. ` + formatText(el.line, "  "));
+  console.log(el.line);
   el.comments.forEach((x) => {
     console.log(formatText(x, ""));
   });
   el.history.forEach((x) => {
-    console.log("  " + formatText(x, "      "));
+    console.log("\t" + formatText(x, "\t    "));
   });
   console.log("\n");
-};
-
-const gensst = () => {
-  const days = sst(sspath);
-
-  for (const day of days) {
-    console.log(day.title);
-    for (const set of day.sets) {
-      console.log(tab, set.title);
-      for (const el of set.elements) {
-        format(el, 0);
-      }
-    }
-    console.log("\n");
-  }
 };
 
 // Toy randomizer, has to produce the same sequence for our purposes.
@@ -66,24 +56,8 @@ const lcg = () => {
   };
 };
 
-/**
- * Returns item's last time as a timestamp.
- */
-const lastTime = (x: Item) => {
-  const ts = (s: string) => new Date(s).getTime();
-  const n = x.history.length;
-  if (n == 0) {
-    return ts("2000-01-01");
-  }
-  const m = x.history[n - 1].match(/(\d\d\d\d\-\d\d\-\d\d)/);
-  if (!m) {
-    return ts("2000-01-01");
-  }
-  return ts(m[1]);
-};
-
 const priority = (x: Item) => {
-  let p = Date.now() - lastTime(x);
+  let p = Date.now() - x.lastTime();
   // Exercises marked as r=2 will be scheduled twice as often.
   // This would work for an arbitrary factor, not just 2, but only 2
   // was needed so far.
@@ -96,15 +70,15 @@ const priority = (x: Item) => {
 const order = (xs: Item[], rnd: () => number) => {
   return xs
     .map((s) => {
-      return { s, gap: priority(s) };
+      // When exercises have empty history, ordering by gap would be a noop,
+      // so we also add a random score.
+      return { s, gap: priority(s), score: rnd() };
     })
     .sort((a, b) => {
       if (a.gap != b.gap) {
         return b.gap - a.gap;
       }
-      // If most exercises have empty history, the command would just return
-      // them in the list order. Shuffle to prevent that.
-      return rnd() - rnd();
+      return a.score - b.score;
     })
     .map((x) => x.s);
 };
@@ -141,6 +115,7 @@ const cmds = [
   },
   {
     name: "themes",
+    desc: "prints themes and the number of exercises for each",
     f: () => {
       const g = groupBy(parseSuperset(sspath), (x) => x.kind);
       Object.entries(g)
@@ -149,12 +124,6 @@ const cmds = [
           console.log(v.length + "\t" + k);
         });
     },
-    desc: "prints themes and the number of exercises for each",
-  },
-  {
-    name: "gen",
-    f: gensst,
-    desc: "generates a random set",
   },
   {
     name: "top",
@@ -173,11 +142,9 @@ const cmds = [
       const rnd = lcg();
 
       // Select exercises that match the filter.
-      const exers = parseSuperset(sspath).filter((x) => {
+      const exers = ss().filter((x) => {
         if (include.length > 0 && !include.includes(x.kind)) return false;
         if (exclude.length > 0 && exclude.includes(x.kind)) return false;
-        if (x.categories.includes("50")) return false;
-        if (x.categories.includes("meh")) return false;
         return true;
       });
 
@@ -188,7 +155,7 @@ const cmds = [
           const items = order(e[1], rnd);
           return {
             group: e[0],
-            lastTime: Math.max(...items.map(lastTime)),
+            lastTime: Math.max(...items.map((x) => x.lastTime())),
             items,
           };
         })
