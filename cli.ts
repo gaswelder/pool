@@ -165,9 +165,29 @@ const cmds = [
       // We want `n` exercises from `nkinds` groups, but the groups will
       // have uneven sizes. Getting n/nkinds from each is too rough, so we'll
       // do a round robin.
-      const top = roundRobin(groups.map((x) => x.items)).slice(0, n);
+      const top = roundRobin(groups.map((x) => x.items));
 
-      top.forEach(format);
+      const ok = [] as Item[];
+      const aside = [] as Item[];
+      const hasTime = (x: Item) => x.parsed.tags.includes("time");
+
+      const constraints = [
+        // Don't start a set with a time test.
+        (x: Item) => ok.length == 0 && hasTime(x),
+
+        // Don't have more than one time tests in a set.
+        (x: Item) => hasTime(x) && ok.some(hasTime),
+      ];
+
+      for (const x of top) {
+        if (constraints.some((f) => f(x))) {
+          aside.push(x);
+          continue;
+        }
+        ok.push(x);
+      }
+
+      ok.slice(0, n).forEach(format);
     },
   },
 ];
