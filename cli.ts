@@ -170,13 +170,28 @@ const cmds = [
       const ok = [] as Item[];
       const aside = [] as Item[];
       const hasTime = (x: Item) => x.parsed.tags.includes("time");
+      const isYellow = (x: Item) => x.categories.includes("yellow");
+      const isRed = (x: Item) => x.categories.includes("red") || hasTime(x);
 
       const constraints = [
-        // Don't start a set with a time test.
-        (x: Item) => ok.length == 0 && hasTime(x),
+        // Don't start a set with a red.
+        (x: Item) => ok.length == 0 && isRed(x),
 
-        // Don't have more than one time tests in a set.
+        // Don't have more than one time test in a set.
         (x: Item) => hasTime(x) && ok.some(hasTime),
+
+        // Don't have more than two reds in a set.
+        (x: Item) => isRed(x) && ok.some(isRed),
+
+        // Don't follow yellow with a red.
+        (x: Item) => ok.length > 0 && isYellow(ok[ok.length - 1]) && isRed(x),
+
+        // Don't do more than 2 yellows
+        (x: Item) =>
+          ok.length >= 2 &&
+          isYellow(ok[ok.length - 1]) &&
+          isYellow(ok[ok.length - 2]) &&
+          isYellow(x),
       ];
 
       for (const x of top) {
