@@ -31,18 +31,6 @@ const formatText = (s: string, indent: string) => {
   return lines.join("\n");
 };
 
-const format = (el: Item, i: number) => {
-  // console.log(`${i + 1}. ` + formatText(el.line, "  "));
-  console.log(el.line);
-  el.comments.forEach((x) => {
-    console.log(formatText(x, ""));
-  });
-  el.history.forEach((x) => {
-    console.log("\t" + formatText(x, "\t    "));
-  });
-  console.log("\n");
-};
-
 // Toy randomizer, has to produce the same sequence for our purposes.
 const lcg = () => {
   let val = 0;
@@ -190,13 +178,13 @@ const cmds = [
       const isRed = (x: Item) => x.categories.includes("red") || hasTime(x);
 
       const constraints = [
-        // Don't start a set with a red.
-        (x: Item) => ok.length == 0 && isRed(x),
+        // Don't start a set with a red or yellow
+        (x: Item) => ok.length == 0 && (isRed(x) || isYellow(x)),
 
-        // Don't have more than one time test in a set.
-        (x: Item) => hasTime(x) && ok.some(hasTime),
+        // Don't start with rest.
+        (x: Item) => ok.length == 0 && x.categories.includes("rest"),
 
-        // Don't have more than two reds in a set.
+        // Don't have more than one red in a set.
         (x: Item) => isRed(x) && ok.some(isRed),
 
         // Don't follow yellow with a red.
@@ -218,7 +206,19 @@ const cmds = [
         ok.push(x);
       }
 
-      ok.slice(0, n).forEach(format);
+      let total = 0;
+      ok.slice(0, n).forEach((el) => {
+        console.log(el.line);
+        el.comments.forEach((x) => {
+          console.log(formatText(x, ""));
+        });
+        el.history.forEach((x) => {
+          console.log("\t" + formatText(x, "\t    "));
+        });
+        total += el.parsed.repeats * el.parsed.amount;
+        console.log("// " + total);
+        console.log("\n");
+      });
     },
   },
 ];
