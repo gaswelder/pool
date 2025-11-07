@@ -106,7 +106,7 @@ const cmds = [
     name: "ls",
     desc: "prints all exercises",
     f: () => {
-      parseSuperset(sspath)
+      ss()
         .sort((a, b) => a.kind.localeCompare(b.kind))
         .forEach((s) => {
           console.log(s.line);
@@ -117,12 +117,28 @@ const cmds = [
     name: "themes",
     desc: "prints themes and the number of exercises for each",
     f: () => {
-      const g = groupBy(parseSuperset(sspath), (x) => x.kind);
-      Object.entries(g)
+      const g = groupBy(ss(), (x) => x.kind);
+      const themes = Object.entries(g)
         .sort((a, b) => b[1].length - a[1].length)
         .map(([k, v]) => {
-          console.log(v.length + "\t" + k);
+          const executions = v.flatMap((x) => x.history);
+          const last = v
+            .flatMap((x) => x.lastTime())
+            .sort((a, b) => a - b)
+            .reverse()[0];
+          return {
+            name: k,
+            size: v.length,
+            executions: executions.length,
+            lastTime: new Date(last).toISOString().substring(0, 10),
+          };
         });
+      themes.sort((b, a) => a.lastTime.localeCompare(b.lastTime));
+      for (const t of themes) {
+        console.log(
+          `${t.name}\t${t.lastTime} last, ${t.size} in list, ${t.executions} executions`
+        );
+      }
     },
   },
   {
