@@ -152,9 +152,8 @@ const cmds = [
         return true;
       });
 
-      // Group by kind, add staleness to each group
-      // and get the `nkinds` top stale groups.
-      const groups = Object.entries(groupBy(exers, (x) => x.kind))
+      // Group by kind, add staleness to each group.
+      const allGroups = Object.entries(groupBy(exers, (x) => x.kind))
         .map((e) => {
           const items = order(e[1], rnd);
           return {
@@ -163,51 +162,68 @@ const cmds = [
             items,
           };
         })
-        .sort((a, b) => a.lastTime - b.lastTime)
-        .slice(0, nkinds);
+        .sort((a, b) => a.lastTime - b.lastTime);
 
-      // We want `n` exercises from `nkinds` groups, but the groups will
-      // have uneven sizes. Getting n/nkinds from each is too rough, so we'll
-      // do a round robin.
-      const top = roundRobin(groups.map((x) => x.items));
+      // Select main groups to choose from.
+      // The other groups will be backup.
+      const mainGroups = allGroups.slice(0, nkinds);
+      const otherGroups = allGroups.slice(nkinds, allGroups.length);
 
+      // Define a simplistic constraints system.
       const ok = [] as Item[];
       const aside = [] as Item[];
       const hasTime = (x: Item) => x.parsed.tags.includes("time");
-      const isYellow = (x: Item) => x.categories.includes("yellow");
+      const isYellow = (x: Item) =>
+        x.categories.includes("yellow") || x.kind == "im" || x.kind == "dol";
       const isRed = (x: Item) => x.categories.includes("red") || hasTime(x);
-
       const constraints = [
-        // Don't start a set with a red or yellow
-        (x: Item) => ok.length == 0 && (isRed(x) || isYellow(x)),
-
-        // Don't start with rest.
-        (x: Item) => ok.length == 0 && x.categories.includes("rest"),
-
-        // Don't have more than one red in a set.
-        (x: Item) => isRed(x) && ok.some(isRed),
-
-        // Don't follow yellow with a red.
-        (x: Item) => ok.length > 0 && isYellow(ok[ok.length - 1]) && isRed(x),
-
-        // Don't do more than 2 yellows
-        (x: Item) =>
-          ok.length >= 2 &&
-          isYellow(ok[ok.length - 1]) &&
-          isYellow(ok[ok.length - 2]) &&
-          isYellow(x),
+        {
+          name: "Don't start with a red",
+          f: (x: Item) => ok.length == 0 && isRed(x),
+        },
+        {
+          name: "Don't start with rest",
+          f: (x: Item) => ok.length == 0 && x.categories.includes("rest"),
+        },
+        {
+          name: "Don't have more than one red in a set",
+          f: (x: Item) => isRed(x) && ok.filter(isRed).length >= 1,
+        },
+        {
+          name: "Don't follow yellow with a red",
+          f: (x: Item) =>
+            ok.length > 0 && isYellow(ok[ok.length - 1]) && isRed(x),
+        },
+        {
+          name: "Don't do more than 2 yellows",
+          f: (x: Item) => isYellow(x) && ok.filter(isYellow).length >= 2,
+        },
       ];
 
-      for (const x of top) {
-        if (constraints.some((f) => f(x))) {
-          aside.push(x);
-          continue;
+      const filtered = new Map<string, number>();
+
+      const feed = (items: Item[]) => {
+        for (const x of items) {
+          if (ok.length >= n) {
+            break;
+          }
+          const fail = constraints.find((c) => c.f(x));
+          if (fail) {
+            filtered.set(fail.name, (filtered.get(fail.name) || 0) + 1);
+            // console.log("// " + x.line + " -- " + fail.name);
+            aside.push(x);
+            continue;
+          }
+          ok.push(x);
         }
-        ok.push(x);
-      }
+      };
+
+      feed(roundRobin(mainGroups.map((x) => x.items)));
+      feed([...aside]);
+      feed(roundRobin(otherGroups.map((x) => x.items)));
 
       let total = 0;
-      ok.slice(0, n).forEach((el) => {
+      ok.forEach((el) => {
         console.log(el.line);
         el.comments.forEach((x) => {
           console.log(formatText(x, ""));
@@ -219,6 +235,8 @@ const cmds = [
         console.log("// " + total);
         console.log("\n");
       });
+
+      console.log(filtered);
     },
   },
 ];
