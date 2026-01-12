@@ -1,4 +1,5 @@
 import { parseArgs } from "./clilib";
+import { compose1 } from "./compose";
 import { groupBy } from "./src/backend/lib";
 import { Item, parseSuperset } from "./src/backend/superset";
 
@@ -71,24 +72,6 @@ const order = (xs: Item[], rnd: () => number) => {
     .map((x) => x.s);
 };
 
-const roundRobin = <T>(groups: T[][]) => {
-  const r = [] as T[];
-  const pos = groups.map((g) => 0);
-
-  for (;;) {
-    let ok = false;
-    groups.forEach((g, i) => {
-      if (pos[i] < g.length) {
-        ok = true;
-        r.push(g[pos[i]]);
-        pos[i]++;
-      }
-    });
-    if (!ok) break;
-  }
-  return r;
-};
-
 const cmds = [
   {
     name: "ls",
@@ -138,7 +121,6 @@ const cmds = [
 
       const exclude = params.e.split(",");
       let n = 10;
-      const nkinds = 2;
       if (params.n != "") {
         n = parseInt(params.n, 10);
       }
@@ -166,48 +148,20 @@ const cmds = [
 
       // Select main groups to choose from.
       // The other groups will be backup.
+      const nkinds = 2;
       const mainGroups = allGroups.slice(0, nkinds);
       const otherGroups = allGroups.slice(nkinds, allGroups.length);
 
-      // Define a simplistic constraints system.
       const ok = [] as Item[];
       const aside = [] as Item[];
-      const hasTime = (x: Item) => x.parsed.tags.includes("time");
-      const isYellow = (x: Item) =>
-        x.categories.includes("yellow") || x.kind == "im" || x.kind == "dol";
-      const isRed = (x: Item) => x.categories.includes("red") || hasTime(x);
-      const constraints = [
-        {
-          name: "Don't start with a red",
-          f: (x: Item) => ok.length == 0 && isRed(x),
-        },
-        {
-          name: "Don't start with rest",
-          f: (x: Item) => ok.length == 0 && x.categories.includes("rest"),
-        },
-        {
-          name: "Don't have more than one red in a set",
-          f: (x: Item) => isRed(x) && ok.filter(isRed).length >= 1,
-        },
-        {
-          name: "Don't follow yellow with a red",
-          f: (x: Item) =>
-            ok.length > 0 && isYellow(ok[ok.length - 1]) && isRed(x),
-        },
-        {
-          name: "Don't do more than 2 yellows",
-          f: (x: Item) => isYellow(x) && ok.filter(isYellow).length >= 2,
-        },
-      ];
-
       const filtered = new Map<string, number>();
-
+      const bob = compose1();
       const feed = (items: Item[]) => {
         for (const x of items) {
           if (ok.length >= n) {
             break;
           }
-          const fail = constraints.find((c) => c.f(x));
+          const fail = bob.rejects(x);
           if (fail) {
             filtered.set(fail.name, (filtered.get(fail.name) || 0) + 1);
             // console.log("// " + x.line + " -- " + fail.name);
@@ -221,18 +175,12 @@ const cmds = [
       feed(roundRobin(mainGroups.map((x) => x.items)));
       feed([...aside]);
       feed(roundRobin(otherGroups.map((x) => x.items)));
-
       let total = 0;
+
       ok.forEach((el) => {
-        console.log(el.line);
-        el.comments.forEach((x) => {
-          console.log(formatText(x, ""));
-        });
-        el.history.forEach((x) => {
-          console.log("\t" + formatText(x, "\t    "));
-        });
+        printItem(el);
         total += el.parsed.repeats * el.parsed.amount;
-        console.log("// " + total);
+        console.log("\n// " + total);
         console.log("\n");
       });
 
@@ -240,6 +188,36 @@ const cmds = [
     },
   },
 ];
+
+const printItem = (el: Item) => {
+  const line = "-".repeat(80);
+  console.log(line + "\n" + el.line + "\n" + line);
+  el.comments.forEach((x) => {
+    console.log(formatText(x, ""));
+  });
+  console.log("");
+  el.history.forEach((x) => {
+    console.log(formatText(x, "\t    "));
+  });
+};
+
+const roundRobin = <T>(groups: T[][]) => {
+  const r = [] as T[];
+  const pos = groups.map((g) => 0);
+
+  for (;;) {
+    let ok = false;
+    groups.forEach((g, i) => {
+      if (pos[i] < g.length) {
+        ok = true;
+        r.push(g[pos[i]]);
+        pos[i]++;
+      }
+    });
+    if (!ok) break;
+  }
+  return r;
+};
 
 const cmd = cmds.find((x) => x.name == process.argv[2]);
 if (cmd) {
