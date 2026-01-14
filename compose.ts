@@ -40,6 +40,10 @@ export const compose1 = () => {
       name: "Don't rest too early",
       f: (x: Item) => isRest(x) && total() < 1000,
     },
+    {
+      name: "Don't #time too early",
+      f: (x: Item) => hasTime(x) && total() < 1000,
+    },
   ];
   return {
     rejects(x: Item) {
