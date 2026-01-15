@@ -154,7 +154,6 @@ const cmds = [
 
       const ok = [] as Item[];
       const aside = [] as Item[];
-      const filtered = new Map<string, number>();
       const bob = compose1();
       const feed = (items: Item[]) => {
         for (const x of items) {
@@ -163,8 +162,7 @@ const cmds = [
           }
           const fail = bob.rejects(x);
           if (fail) {
-            filtered.set(fail.name, (filtered.get(fail.name) || 0) + 1);
-            // console.log("// " + x.line + " -- " + fail.name);
+            console.log("meh", fail.name + ":", x.line);
             aside.push(x);
             continue;
           }
@@ -180,22 +178,24 @@ const cmds = [
       ok.forEach((el) => {
         printItem(el);
         total += el.parsed.repeats * el.parsed.amount;
-        console.log("\n// " + total);
-        console.log("\n");
+        console.log("// " + total);
+        // console.log("\n");
       });
-
-      console.log(filtered);
     },
   },
 ];
 
 const printItem = (el: Item) => {
   const line = "-".repeat(80);
-  console.log(line + "\n" + el.line + "\n" + line);
+  console.log(line);
+  console.log(el.line);
+  console.log(line);
   el.comments.forEach((x) => {
     console.log(formatText(x, ""));
   });
-  console.log("");
+  if (el.comments.length > 0) {
+    console.log("");
+  }
   el.history.forEach((x) => {
     console.log(formatText(x, "\t    "));
   });

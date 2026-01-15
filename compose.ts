@@ -3,8 +3,7 @@ import { Item } from "./src/backend/superset";
 const hasTime = (x: Item) => x.parsed.tags.includes("time");
 const isYellow = (x: Item) =>
   x.categories.includes("yellow") || x.kind == "im" || x.kind == "dol";
-const isRed = (x: Item) =>
-  x.categories.includes("red") || hasTime(x) || x.kind == "uw";
+const isRed = (x: Item) => x.categories.includes("red");
 const isSlow = (x: Item) =>
   x.kind == "uw" || x.parsed.desc.startsWith("dol kick");
 const isRest = (x: Item) => x.categories.includes("rest");
