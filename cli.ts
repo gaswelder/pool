@@ -1,6 +1,6 @@
 import { parseArgs } from "./clilib";
-import { compose1 } from "./compose";
 import { groupBy } from "./src/backend/lib";
+import { order } from "./src/backend/sched";
 import { Item, parseSuperset } from "./src/backend/superset";
 
 const sspath = process.env.SSPATH;
@@ -30,46 +30,6 @@ const formatText = (s: string, indent: string) => {
     lines.push(line);
   }
   return lines.join("\n");
-};
-
-// Toy randomizer, has to produce the same sequence for our purposes.
-const lcg = () => {
-  let val = 0;
-  const m = 567567;
-  const a = 123123;
-  const mod = 2 ** 16;
-  val = (((val * m) % mod) + a) % mod;
-  return () => {
-    val = (((val * m) % mod) + a) % mod;
-    return val;
-  };
-};
-
-const priority = (x: Item) => {
-  let p = Date.now() - x.lastTime();
-  // Exercises marked as r=2 will be scheduled twice as often.
-  // This would work for an arbitrary factor, not just 2, but only 2
-  // was needed so far.
-  if (x.categories.includes("r=2")) {
-    p *= 2;
-  }
-  return p;
-};
-
-const order = (xs: Item[], rnd: () => number) => {
-  return xs
-    .map((s) => {
-      // When exercises have empty history, ordering by gap would be a noop,
-      // so we also add a random score.
-      return { s, gap: priority(s), score: rnd() };
-    })
-    .sort((a, b) => {
-      if (a.gap != b.gap) {
-        return b.gap - a.gap;
-      }
-      return a.score - b.score;
-    })
-    .map((x) => x.s);
 };
 
 const cmds = [
@@ -125,8 +85,6 @@ const cmds = [
         n = parseInt(params.n, 10);
       }
 
-      const rnd = lcg();
-
       // Select exercises that match the filter.
       const exers = ss().filter((x) => {
         if (include.length > 0 && !include.includes(x.kind)) return false;
@@ -134,51 +92,13 @@ const cmds = [
         return true;
       });
 
-      // Group by kind, add staleness to each group.
-      const allGroups = Object.entries(groupBy(exers, (x) => x.kind))
-        .map((e) => {
-          const items = order(e[1], rnd);
-          return {
-            group: e[0],
-            lastTime: Math.max(...items.map((x) => x.lastTime())),
-            items,
-          };
-        })
-        .sort((a, b) => a.lastTime - b.lastTime);
+      const ok = order(exers).slice(0, n);
 
-      // Select main groups to choose from.
-      // The other groups will be backup.
-      const nkinds = 2;
-      const mainGroups = allGroups.slice(0, nkinds);
-      const otherGroups = allGroups.slice(nkinds, allGroups.length);
-
-      const ok = [] as Item[];
-      const aside = [] as Item[];
-      const bob = compose1();
-      const feed = (items: Item[]) => {
-        for (const x of items) {
-          if (ok.length >= n) {
-            break;
-          }
-          const fail = bob.rejects(x);
-          if (fail) {
-            console.log("meh", fail.name + ":", x.line);
-            aside.push(x);
-            continue;
-          }
-          ok.push(x);
-        }
-      };
-
-      feed(roundRobin(mainGroups.map((x) => x.items)));
-      feed([...aside]);
-      feed(roundRobin(otherGroups.map((x) => x.items)));
-      let total = 0;
-
+      // let total = 0;
       ok.forEach((el) => {
         printItem(el);
-        total += el.parsed.repeats * el.parsed.amount;
-        console.log("// " + total);
+        // total += el.parsed.repeats * el.parsed.amount;
+        // console.log("// " + total);
         // console.log("\n");
       });
     },
@@ -187,9 +107,9 @@ const cmds = [
 
 const printItem = (el: Item) => {
   const line = "-".repeat(80);
-  console.log(line);
+  // console.log(line);
   console.log(el.line);
-  console.log(line);
+  // console.log(line);
   el.comments.forEach((x) => {
     console.log(formatText(x, ""));
   });
@@ -197,26 +117,8 @@ const printItem = (el: Item) => {
     console.log("");
   }
   el.history.forEach((x) => {
-    console.log(formatText(x, "\t    "));
+    console.log("  " + formatText(x, "\t    "));
   });
-};
-
-const roundRobin = <T>(groups: T[][]) => {
-  const r = [] as T[];
-  const pos = groups.map((g) => 0);
-
-  for (;;) {
-    let ok = false;
-    groups.forEach((g, i) => {
-      if (pos[i] < g.length) {
-        ok = true;
-        r.push(g[pos[i]]);
-        pos[i]++;
-      }
-    });
-    if (!ok) break;
-  }
-  return r;
 };
 
 const cmd = cmds.find((x) => x.name == process.argv[2]);
