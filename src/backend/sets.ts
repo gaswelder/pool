@@ -40,7 +40,7 @@ const makeGen = (entries: Item[]) => {
 
   entries.forEach((e) => {
     byCategory.get("")!.push(e);
-    e.categories.forEach((cat) => {
+    e.tags.forEach((cat) => {
       const list = byCategory.get(cat);
       if (list) list.push(e);
       else byCategory.set(cat, [e]);
@@ -107,7 +107,7 @@ const makeGen = (entries: Item[]) => {
 
   const rand = (m: number) => {
     const items = getRandomSets(m, entries);
-    const grouped = groupBy(items, (x) => pickOne(x.categories));
+    const grouped = groupBy(items, (x) => pickOne(x.tags));
     return Object.entries(grouped)
       .map(([category, items]) => {
         const itemGroups = groupBy(items, (x) => kind(x.parsed.desc));

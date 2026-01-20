@@ -10,8 +10,8 @@ if (!sspath) {
 
 const ss = () =>
   parseSuperset(sspath).filter((x) => {
-    if (x.categories.includes("50")) return false;
-    if (x.categories.includes("meh")) return false;
+    if (x.tags.includes("50")) return false;
+    if (x.tags.includes("meh")) return false;
     return true;
   });
 
@@ -32,23 +32,23 @@ const formatText = (s: string, indent: string) => {
   return lines.join("\n");
 };
 
+const kind = (x: Item) => x.desc.split(" ")[0];
+
 const cmds = [
   {
     name: "ls",
     desc: "prints all exercises",
     f: () => {
       ss()
-        .sort((a, b) => a.kind.localeCompare(b.kind))
-        .forEach((s) => {
-          console.log(s.line);
-        });
+        .sort((a, b) => kind(a).localeCompare(kind(b)))
+        .forEach(printItem);
     },
   },
   {
     name: "themes",
     desc: "prints themes and the number of exercises for each",
     f: () => {
-      const g = groupBy(ss(), (x) => x.kind);
+      const g = groupBy(ss(), kind);
       const themes = Object.entries(g)
         .sort((a, b) => b[1].length - a[1].length)
         .map(([k, v]) => {
@@ -87,8 +87,8 @@ const cmds = [
 
       // Select exercises that match the filter.
       const exers = ss().filter((x) => {
-        if (include.length > 0 && !include.includes(x.kind)) return false;
-        if (exclude.length > 0 && exclude.includes(x.kind)) return false;
+        if (include.length > 0 && !include.includes(kind(x))) return false;
+        if (exclude.length > 0 && exclude.includes(kind(x))) return false;
         return true;
       });
 
@@ -108,7 +108,7 @@ const cmds = [
 const printItem = (el: Item) => {
   const line = "-".repeat(80);
   // console.log(line);
-  console.log(el.line);
+  console.log(el.quantity + "\t" + el.desc);
   // console.log(line);
   el.comments.forEach((x) => {
     console.log(formatText(x, ""));

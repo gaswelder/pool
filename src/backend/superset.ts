@@ -11,8 +11,7 @@ export const parseSuperset = (path: string) => {
   const text = fs.readFileSync(path).toString();
   const exes = parseSched(text);
   return exes.map((ex) => {
-    const parsed = parseLine(ex.line);
-    const kind = parsed.desc.split(" ")[0];
-    return { ...ex, parsed, kind };
+    const parsed = parseLine(ex.quantity.toString() + " " + ex.desc);
+    return { ...ex, parsed };
   });
 };
