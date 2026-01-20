@@ -92,18 +92,23 @@ const cmds = [
         return true;
       });
 
-      const ok = order(exers).slice(0, n);
-
-      // let total = 0;
-      ok.forEach((el) => {
-        printItem(el);
-        // total += el.parsed.repeats * el.parsed.amount;
-        // console.log("// " + total);
-        // console.log("\n");
-      });
+      order(exers)
+        .slice(0, n)
+        .sort(
+          by((x) => {
+            if (x.tags.includes("drill")) {
+              return "drill+" + kind(x);
+            }
+            return "swim+" + kind(x);
+          })
+        )
+        .forEach(printItem);
     },
   },
 ];
+
+const by = <T>(key: (x: T) => string) => (a: T, b: T) =>
+  key(a).localeCompare(key(b));
 
 const printItem = (el: Item) => {
   const line = "-".repeat(80);
